@@ -1,6 +1,6 @@
 (require "vm-utils.lisp")
 
-(defun vm-reset (&optional (vm 'machine-virtuel (size 1000)))
+(defun vm-reset (&optional (vm 'machine-virtuel) (size 1000))
     ;; On veut une taille d'au moins 1000 su notre VM, histoire qu'elle soit fonctionnelle.
     (let ((taille (max size 1000)))
         ;; On stocke la taille
@@ -14,7 +14,7 @@
         ;; (set-etiqNR vm 'nb 0)
     ))
 
-(defun vm-make &optional (vm 'machine-virtuel) (size 1000)
+(defun vm-load (&optional (vm 'machine-virtuel) (size 1000))
     ;; Est-ce que c'est vraiment utile?
     (vm-set vm :NAME vm)
     ;; Registres

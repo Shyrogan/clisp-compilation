@@ -1,8 +1,8 @@
 (defun vm-get (vm attr)
-    (get vm attr))
+  (get vm attr))
 
 (defun vm-set (vm attr value)
-    (setf (vm-get vm attr) value))
+  (setf (get mv prop) val))
 
 (defun get-mem (mv adr)
   (aref (get mv :MEM) adr))
@@ -20,10 +20,10 @@
   (vm-set mv :PC val))
 
 (defun pc-inc(mv)
-  (vm-set mv (+ (vm-get :MV :PC) 1)))
+  (pc-set mv (+ (pc-get mv) 1)))
 
-(defun pc-dec(mv)
-  (vm-set mv (- (vm-get :MV :PC) 1)))
+(defun pc-dev(mv)
+  (pc-set mv (- (lc-get mv) 1)))
 
 (defun lc-get(&optional (mv 'mv))
   (vm-get mv :LC))
@@ -32,7 +32,7 @@
   (vm-set mv :LC val))
 
 (defun lc-inc(mv)
-  (vm-set mv (+ (vm-get :MV :LC) 1)))
+  (lc-set mv (+ (lc-get mv) 1)))
 
 (defun lc-dec(mv)
-  (vm-set mv (- (vm-get :MV :LC) 1)))
+  (lc-set mv (- (lc-get mv) 1)))
