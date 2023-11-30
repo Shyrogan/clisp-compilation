@@ -14,7 +14,7 @@
         ;; (set-etiqNR vm 'nb 0)
     ))
 
-(defun vm-load (&optional (vm 'machine-virtuel) (size 1000))
+(defun vm-init (&optional (vm 'machine-virtuel) (size 1000))
     ;; Est-ce que c'est vraiment utile?
     (vm-set vm :NAME vm)
     ;; Registres
