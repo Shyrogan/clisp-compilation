@@ -2,7 +2,7 @@
     (get vm attr))
 
 (defun vm-set (vm attr value)
-    (setf (vm-get vm attr) value))
+    (setf (get vm attr) value))
 
 (defun get-mem (mv adr)
   (aref (get mv :MEM) adr))

@@ -42,3 +42,18 @@
     ;; Flag less than: drapeau plus grand
     (vm-set vm :FGT 0)
     (vm-reset vm size))
+
+
+(defun vm-load (vm program)
+  ;; Charge un programme dans la mémoire de la machine virtuelle.
+  (let ((mem (vm-get vm :MEM))         ;; Récupère la mémoire de la VM.
+        (initial-pc (vm-get vm :PC)))  ;; Sauvegarde la valeur initiale du PC.
+    (loop for instr in program do
+      ;; Place chaque instruction dans la mémoire.
+      (setf (aref mem initial-pc) instr)
+      (setq initial-pc (1+ initial-pc)))  ;; Incrémente la position de la mémoire.
+    (vm-set vm :PC (vm-get vm :PC))))  ;; Réinitialise le PC à la position initiale.
+
+
+
+
