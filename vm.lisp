@@ -14,7 +14,7 @@
         ;; (set-etiqNR vm 'nb 0)
     ))
 
-(defun vm-make (&optional (vm 'machine-virtuel) (size 1000))
+(defun vm-make &optional (vm 'machine-virtuel) (size 1000)
     ;; Est-ce que c'est vraiment utile?
     (vm-set vm :NAME vm)
     ;; Registres
@@ -30,7 +30,7 @@
     ;; Program counter: pointe vers l'adresse de l'instruction suivante à exécuter dans la séquence d'instructions 
     ;; du programme en cours.
     (vm-set vm :PC 0)
-    ;; Program counter: 
+    ;; Line counter: 
     (vm-set vm :LC 0)
     ;; Frame pointer: pointe vers le début d'une frame (ou cadre) de pile pour une fonction donnée dans un programme.
     ;; LEC: sert à définir des blocs de pile pour la structurer et faciliter les accès. 
