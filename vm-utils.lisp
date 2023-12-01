@@ -2,7 +2,7 @@
   (get vm attr))
 
 (defun vm-set (vm attr value)
-  (setf (get mv prop) val))
+  (setf (get mv attr) val)) ;; prop c'est attr non?!
 
 (defun get-mem (mv adr)
   (aref (get mv :MEM) adr))
@@ -22,8 +22,8 @@
 (defun pc-inc(mv)
   (pc-set mv (+ (pc-get mv) 1)))
 
-(defun pc-dev(mv)
-  (pc-set mv (- (lc-get mv) 1)))
+(defun pc-dec(mv) ;;pc-dec?
+  (pc-set mv (- (pc-get mv) 1))) ;;pc-get?
 
 (defun lc-get(&optional (mv 'mv))
   (vm-get mv :LC))
