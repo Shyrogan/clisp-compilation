@@ -1,6 +1,6 @@
 (require "vm-utils.lisp")
 
-(defun vm-reset (&optional (vm 'machine-virtuel) (size 1000))
+(defun vm-reset ( vm  &optional(size 1000))
     ;; On veut une taille d'au moins 1000 su notre VM, histoire qu'elle soit fonctionnelle.
     (let ((taille (max size 1000)))
         ;; On stocke la taille
@@ -13,9 +13,10 @@
         (vm-set vm :UKNWN_ETIQ (make-hash-table :size taille))
         ;; (set-etiqNR vm 'nb 0)
          
-    ))
+    )
+)
 
-(defun vm-init (&optional (vm 'machine-virtuel) (size 1000))
+(defun vm-init ( vm &optional(size 1000))
     ;; Est-ce que c'est vraiment utile?
     (vm-set vm :NAME vm)
     ;; Registres
@@ -43,67 +44,84 @@
     ;; Flag less than: drapeau plus grand
     (vm-set vm :FGT 0)
     (vm-reset vm size)
-    )
+)
 
-    (defun vm-load (vm program)
+(defun vm-load (vm program)
   ;; Charge un programme dans la mémoire de la machine virtuelle.
-        (let ((mem (vm-get vm :MEM))         ;; Récupère la mémoire de la VM.
-        (initial-pc (vm-get vm :PC)))  ;; Sauvegarde la valeur initiale du PC.
-            (loop for instr in program do
-                (setf (aref mem initial-pc) instr) ;; Place chaque instruction dans la mémoire.
-                (setq initial-pc (- initial-pc 1))  ;; Decrémente la position de la mémoire. 999->998->997
-            )
-            (vm-set vm :LAST_CODE (+ initial-pc 1)) ;; on a enregistré l'adress de la dernière instruction! et le début 
-            (vm-set vm :PC (vm-get vm :PC))   ;; Réinitialise le PC à la position initiale.
-        )   
-    )
+    (let ((mem (vm-get vm :MEM))         ;; Récupère la mémoire de la VM.
+    (initial-pc (vm-get vm :PC)))  ;; Sauvegarde la valeur initiale du PC.
+        (loop for instr in program do
+            (setf (aref mem initial-pc) instr) ;; Place chaque instruction dans la mémoire.
+            (setq initial-pc (- initial-pc 1))  ;; Decrémente la position de la mémoire. 999->998->997
+        )
+        (vm-set vm :LAST_CODE (+ initial-pc 1)) ;; on a enregistré l'adress de la dernière instruction! et le début 
+        (vm-set vm :PC (vm-get vm :PC))   ;; Réinitialise le PC à la position initiale.
+    )   
+)
 
      (defun vm-execute (vm)
   ;; Execution Engine: Charge d'éxecuter les instructions une après l'autre 
         (let ((mem (vm-get vm :MEM))         ;; Récupère la mémoire de la VM.
         (initial-pc (vm-get vm :PC)))  ;; Sauvegarde la valeur initiale du PC.
-            (loop while (>= pc (vm-get vm :LAST_CODE))  ;; Continue tant que PC est dans les limites de la mémoire.
-                do (let ((instr (aref mem pc)))  ;; Récupère l'instruction actuelle.
+            (loop while (>= initial-pc (vm-get vm :LAST_CODE))  ;; Continue tant que PC est dans les limites de la mémoire.
+                do (let ((instr (aref mem initial-pc)))  ;; Récupère l'instruction comme une liste!  (LOAD 'R1 10).
                     (cond
                         ;; Exemple : Si l'instruction est un certain type, effectuez une action.
                         ;; Là on compare les instructions
-                        ((equal instr 'LOAD) (handle-instr1 vm))
-                        ((equal instr 'STORE) (handle-instr2 vm))
-                        ((equal instr 'MOVE) (handle-instr1 vm))
-                        ((equal instr 'ADD) (handle-instr2 vm))
-                        ((equal instr 'SUB) (handle-instr1 vm))
-                        ((equal instr 'MUL) (handle-instr2 vm))
-                        ((equal instr 'DIV) (handle-instr1 vm))
-                        ((equal instr 'INCR) (handle-instr2 vm))
-                        ((equal instr 'PUSH) (handle-instr1 vm))
-                        ((equal instr 'POP) (handle-instr2 vm))
-                        ((equal instr 'LABEL) (handle-instr1 vm))
-                        ((equal instr 'JMP) (handle-instr2 vm))
-                        ((equal instr 'JSR) (handle-instr1 vm))
-                        ((equal instr 'RTN) (handle-instr2 vm))
-                        ((equal instr 'CMP) (handle-instr1 vm))
-                        ((equal instr 'JGT) (handle-instr2 vm))
-                        ((equal instr 'JGE) (handle-instr1 vm))
-                        ((equal instr 'JLT) (handle-instr2 vm))
-                        ((equal instr 'JLE) (handle-instr1 vm))
-                        ((equal instr 'JEQ) (handle-instr2 vm))
-                        ((equal instr 'JNE) (handle-instr1 vm))
-                        ((equal instr 'TEST) (handle-instr2 vm))
-                        ((equal instr 'JTRUE) (handle-instr1 vm))
-                        ((equal instr 'JNIL) (handle-instr2 vm))
-                        ((equal instr 'NOP) (handle-instr1 vm))
-                        ((equal instr 'HALT) (handle-instr2 vm))
+                        ((equal (first instr) 'LOAD) (handle-load vm instr))
+                        ((equal (first instr) 'STORE) (handle-store  vm instr))
+                        ((equal (first instr) 'MOVE) (handle-move vm))
+                        ((equal (first instr) 'ADD) (handle-add vm))
+                        ((equal (first instr) 'SUB) (handle-sub vm))
+                        ((equal (first instr) 'MUL) (handle-mul vm))
+                        ((equal (first instr) 'DIV) (handle-div vm))
+                        ((equal (first instr) 'INCR) (handle-incr vm))
+                        ((equal (first instr) 'PUSH) (handle-push vm))
+                        ((equal (first instr) 'POP) (handle-pop vm))
+                        ((equal (first instr) 'LABEL) (handle-label vm))
+                        ((equal (first instr) 'JMP) (handle-jmp vm))
+                        ((equal (first instr) 'JSR) (handle-jsr vm))
+                        ((equal (first instr) 'RTN) (handle-rtn vm))
+                        ((equal (first instr) 'CMP) (handle-cmp vm))
+                        ((equal (first instr) 'JGT) (handle-jgt vm))
+                        ((equal (first instr) 'JGE) (handle-jge vm))
+                        ((equal (first instr) 'JLT) (handle-jlt vm))
+                        ((equal (first instr) 'JLE) (handle-jle vm))
+                        ((equal (first instr) 'JEQ) (handle-jeq vm))
+                        ((equal (first instr) 'JNE) (handle-jne vm))
+                        ((equal (first instr) 'TEST) (handle-test vm))
+                        ((equal (first instr) 'JTRUE) (handle-jtrue vm))
+                        ((equal (first instr) 'JNIL) (handle-jnil vm)) 
+                        ((equal (first instr) 'NOP) (handle-nop vm))
+                        ((equal (first instr) 'HALT) (handle-halt vm))
+
                         (t (format t "Instruction inconnue: ~A~%" instr))) ;;pour les cas d'erreurs
                     ;; Incrémente PC pour passer à l'instruction suivante.
                    (setq initial-pc (- initial-pc 1))
                 )
             )
 
-
-
             (vm-set vm :PC (vm-get vm :PC)) )  ;; Réinitialise le PC à la position initiale.
-        
-        
-        
-        )   
-    
+        )
+
+(defun handle-load (vm instr)
+  ;; Assume instr is like (LOAD 'R1 10)
+  (let ((reg (second instr))  ;; 'R1
+        (val (third instr)))  ;; 10
+    ;; Execute the load - store `val` in the register `reg`
+    (vm-set vm reg val)
+    (format t "Loaded ~A into ~A~%" val reg))
+)
+
+(defun handle-store (vm instr)
+    ;; Assume instr is like (STORE 'R1 100)
+    ;; Where 'R1 is the register and 100 is the memory address
+    (let ((reg (second instr))   ;; Extracts the register (e.g., 'R1)
+        (adr (third instr)))   ;; Extracts the memory address (e.g., 100)
+    ;; Retrieve the value stored in the register
+        (let ((val (vm-get vm reg)))
+            ;; Store the value from the register to the specified memory address
+            (mem-set vm adr val)
+            (format t "Stored ~A from ~A to memory address ~A~%" val reg adr))
+    )
+)

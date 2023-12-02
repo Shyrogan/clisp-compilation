@@ -10,13 +10,26 @@
       (vm-reset vm)
       (print  (= (get vm :PC ) 999) ) ;; pour voir que vm-reset a fait son travail
   
-  ;; Charger un programme de test dans la VM
-      (vm-load vm '(instr1 instr2 instr3 ))
+      ;; Charger un programme de test dans la VM
+      (vm-load vm '((LOAD :R1 10 ) (STORE :R1 10 ) ))
+      ;; Exécuter le programme (supposant que vous avez une fonction vm-execute)
+      (vm-execute  vm)
 
-  ;; Exécuter le programme (supposant que vous avez une fonction vm-execute)
-  ;;(vm-execute my-vm)
+      ;; Vérifier les résultats
+      (print (= (get vm :R1 ) 10)) 
+      (print (= (get-mem vm 10) 10 )) 
+      
+      (print vm) ;; ca marche pas!!!!!!!!!!!!!!!!!!!!!!
+      (afficher-registres vm) ;; ca marche pas!!!!!!!!!!!!!!!!!!!!!! jppp!
 
-  ;; Vérifier les résultats
-  ;;(assert (= (vm-get my-vm :R0) expected-value))
-  ;; Ajouter plus de vérifications au besoin
   )
+
+
+
+
+
+
+
+
+
+

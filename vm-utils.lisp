@@ -36,3 +36,12 @@
 
 (defun lc-dec(vm)
   (lc-set vm (- (lc-get vm) 1)))
+
+
+
+  #| Elements de test |#
+(defun afficher-registres (vm)
+  (loop for (reg val) on vm by #'cddr
+        do (format t "~A: ~A~%" reg val)
+  )
+)
