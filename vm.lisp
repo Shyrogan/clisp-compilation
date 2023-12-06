@@ -59,50 +59,47 @@
     )   
 )
 
-     (defun vm-execute (vm)
-  ;; Execution Engine: Charge d'éxecuter les instructions une après l'autre 
-        (let ((mem (vm-get vm :MEM))         ;; Récupère la mémoire de la VM.
-        (initial-pc (vm-get vm :PC)))  ;; Sauvegarde la valeur initiale du PC.
-            (loop while (>= initial-pc (vm-get vm :LAST_CODE))  ;; Continue tant que PC est dans les limites de la mémoire.
-                do (let ((instr (aref mem initial-pc)))  ;; Récupère l'instruction comme une liste!  (LOAD 'R1 10).
-                    (cond
+(defun vm-execute (vm)
+    ;; Execution Engine: Charge d'éxecuter les instructions une après l'autre 
+    (let ((mem (vm-get vm :MEM)))         ;; Récupère la mémoire de la VM.) 
+        (loop while (>= (vm-get vm :PC) (vm-get vm :LAST_CODE))  ;; Continue tant que PC est dans les limites de la mémoire.
+            do (let ((instr (aref mem (vm-get vm :PC))))  ;; Récupère l'instruction comme une liste!  (LOAD 'R1 10).
+                (cond
                         ;; Exemple : Si l'instruction est un certain type, effectuez une action.
                         ;; Là on compare les instructions
                         ((equal (first instr) 'LOAD) (handle-load vm instr))
                         ((equal (first instr) 'STORE) (handle-store  vm instr))
-                        ((equal (first instr) 'MOVE) (handle-move vm))
-                        ((equal (first instr) 'ADD) (handle-add vm))
-                        ((equal (first instr) 'SUB) (handle-sub vm))
-                        ((equal (first instr) 'MUL) (handle-mul vm))
-                        ((equal (first instr) 'DIV) (handle-div vm))
-                        ((equal (first instr) 'INCR) (handle-incr vm))
-                        ((equal (first instr) 'PUSH) (handle-push vm))
-                        ((equal (first instr) 'POP) (handle-pop vm))
-                        ((equal (first instr) 'LABEL) (handle-label vm))
-                        ((equal (first instr) 'JMP) (handle-jmp vm))
-                        ((equal (first instr) 'JSR) (handle-jsr vm))
-                        ((equal (first instr) 'RTN) (handle-rtn vm))
-                        ((equal (first instr) 'CMP) (handle-cmp vm))
-                        ((equal (first instr) 'JGT) (handle-jgt vm))
-                        ((equal (first instr) 'JGE) (handle-jge vm))
-                        ((equal (first instr) 'JLT) (handle-jlt vm))
-                        ((equal (first instr) 'JLE) (handle-jle vm))
-                        ((equal (first instr) 'JEQ) (handle-jeq vm))
-                        ((equal (first instr) 'JNE) (handle-jne vm))
-                        ((equal (first instr) 'TEST) (handle-test vm))
-                        ((equal (first instr) 'JTRUE) (handle-jtrue vm))
-                        ((equal (first instr) 'JNIL) (handle-jnil vm)) 
-                        ((equal (first instr) 'NOP) (handle-nop vm))
-                        ((equal (first instr) 'HALT) (handle-halt vm))
-
+                        ((equal (first instr) 'MOVE) (handle-move vm instr))
+                        ((equal (first instr) 'ADD) (handle-add vm instr))
+                        ((equal (first instr) 'SUB) (handle-sub vm instr))
+                        ((equal (first instr) 'MUL) (handle-mul vm instr))
+                        ((equal (first instr) 'DIV) (handle-div vm instr))
+                        ((equal (first instr) 'INCR) (handle-incr vm instr))
+                        ((equal (first instr) 'PUSH) (handle-push vm instr))
+                        ((equal (first instr) 'POP) (handle-pop vm instr))
+                        ((equal (first instr) 'LABEL) (handle-label vm instr))
+                        ((equal (first instr) 'JMP) (handle-jmp vm instr))
+                        ((equal (first instr) 'JSR) (handle-jsr vm instr))
+                        ((equal (first instr) 'RTN) (handle-rtn vm instr))
+                        ((equal (first instr) 'CMP) (handle-cmp vm instr))
+                        ((equal (first instr) 'JGT) (handle-jgt vm instr))
+                        ((equal (first instr) 'JGE) (handle-jge vm instr))
+                        ((equal (first instr) 'JLT) (handle-jlt vm instr))
+                        ((equal (first instr) 'JLE) (handle-jle vm instr))
+                        ((equal (first instr) 'JEQ) (handle-jeq vm instr))
+                        ((equal (first instr) 'JNE) (handle-jne vm instr))
+                        ((equal (first instr) 'TEST) (handle-test vm instr))
+                        ((equal (first instr) 'JTRUE) (handle-jtrue vm instr))
+                        ((equal (first instr) 'JNIL) (handle-jnil vm instr)) 
+                        ((equal (first instr) 'NOP) (handle-nop vm instr))
+                        ((equal (first instr) 'HALT) (handle-halt vm instr))
                         (t (format t "Instruction inconnue: ~A~%" instr))) ;;pour les cas d'erreurs
                     ;; Incrémente PC pour passer à l'instruction suivante.
-                   (setq initial-pc (- initial-pc 1))
+                   (vm-set vm :PC (- (vm-get vm :PC) 1))
                 )
-            )
-
-            (vm-set vm :PC (vm-get vm :PC)) )  ;; Réinitialise le PC à la position initiale.
-        )
+            ) 
+    )
+ )
 
 (defun handle-load (vm instr)
   ;; Assume instr is like (LOAD 'R1 10)
@@ -124,4 +121,150 @@
             (mem-set vm adr val)
             (format t "Stored ~A from ~A to memory address ~A~%" val reg adr))
     )
+)
+
+(defun handle-move (vm instr) ;;(MOVE 'R1 'R2) copies the value from R1 to R2
+  (let ((src-reg (second instr))
+        (dest-reg (third instr)))
+    (vm-set vm dest-reg (vm-get vm src-reg)))
+)
+
+(defun handle-add (vm instr) ;;(ADD 'R1 'R2) adds the values R1 and R2, storing the result in R2
+  (let ((reg1 (second instr))
+        (reg2 (third instr)))
+    (vm-set vm reg2 (+ (vm-get vm reg1) (vm-get vm reg2))))
+)
+
+(defun handle-sub (vm instr)
+  (let ((reg1 (second instr))
+        (reg2 (third instr)))
+    (vm-set vm reg2 (- (vm-get vm reg1) (vm-get vm reg2))))
+)
+
+(defun handle-mul (vm instr)
+  (let ((reg1 (second instr))
+        (reg2 (third instr)))
+    (vm-set vm reg2 (* (vm-get vm reg1) (vm-get vm reg2))))
+)
+
+(defun handle-div (vm instr)
+    (let ((reg1 (second instr))
+        (reg2 (third instr)))
+    (vm-set vm reg2 (/ (vm-get vm reg1) (vm-get vm reg2))))
+)
+
+(defun handle-incr (vm instr)
+  (let ((reg (second instr)))
+    (vm-set vm reg (+ (vm-get vm reg) 1)))
+)
+
+#| pas fini |#
+(defun handle-push (vm instr)
+  (let ((reg (second instr)))
+    (let ((val (vm-get vm reg)))
+      (let ((sp (vm-get vm :SP)))
+        (mem-set vm sp val)
+        (vm-set vm :SP (+ sp 1)))))
+)
+
+#| pas fini |#
+(defun handle-pop (vm instr)
+  (let ((reg (second instr)))
+    (let ((sp (vm-get vm :SP)))
+      (vm-set vm reg (get-mem vm (- sp 1)))
+      (vm-set vm :SP (- sp 1))))
+)
+
+#| pas fini |#
+(defun handle-label (vm instr)
+  ;; Label handling code
+)
+
+#| pas fini (ça boucle) |#
+(defun handle-jmp (vm instr)
+    (let ((target (second instr)))
+    (vm-set vm :PC (+ target 1)) ;; +1 car on fait -1 à la fin de l'execution de chaque instructino 
+    )
+)
+
+#| pas fini |#
+(defun handle-jsr (vm instr)
+  ;; JSR handling code
+)
+
+#| pas fini |#
+(defun handle-rtn (vm instr)
+  ;; RTN handling code
+)
+
+#| pas fini |#
+(defun handle-cmp (vm instr)
+  (let ((reg1 (second instr))
+        (reg2 (third instr)))
+    (let ((val1 (vm-get vm reg1))
+          (val2 (vm-get vm reg2)))
+      (vm-set vm :FEQ (= val1 val2))
+      (vm-set vm :FLT (< val1 val2))
+      (vm-set vm :FGT (> val1 val2))))
+)
+
+#| pas fini |#
+(defun handle-jgt (vm instr)
+  (when (> (vm-get vm :FGT) 0)
+    (vm-set vm :PC (second instr)))
+)
+
+#| pas fini |#
+(defun handle-jge (vm instr)
+  (when (or (> (vm-get vm :FGT) 0) (= (vm-get vm :FEQ) 1))
+    (vm-set vm :PC (second instr)))
+)
+
+#| pas fini |#
+(defun handle-jlt (vm instr)
+  (when (< (vm-get vm :FLT) 0)
+    (vm-set vm :PC (second instr)))
+)
+
+#| pas fini |#
+(defun handle-jle (vm instr)
+  (when (or (< (vm-get vm :FLT) 0) (= (vm-get vm :FEQ) 1))
+    (vm-set vm :PC (second instr)))
+)
+
+#| pas fini |#
+(defun handle-jeq (vm instr)
+  (when (= (vm-get vm :FEQ) 1)
+    (vm-set vm :PC (second instr)))
+)
+
+#| pas fini |#
+(defun handle-jne (vm instr)
+  (when (/= (vm-get vm :FEQ) 1)
+    (vm-set vm :PC (second instr)))
+)
+
+#| pas fini |#
+(defun handle-test (vm instr)
+  ;; Test handling code
+)
+
+#| pas fini |#
+(defun handle-jtrue (vm instr)
+  (when (> (vm-get vm (second instr)) 0)
+    (vm-set vm :PC (third instr))))
+
+#| pas fini |#
+(defun handle-jnil (vm instr)
+  (when (= (vm-get vm (second instr)) 0)
+    (vm-set vm :PC (third instr))))
+
+#| pas fini |#
+(defun handle-nop (vm instr)
+  ;; NOP handling code
+)
+
+#| pas fini |#
+(defun handle-halt (vm instr)
+  ;; HALT handling code
 )
