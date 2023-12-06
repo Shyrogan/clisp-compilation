@@ -3,8 +3,7 @@
 
  
   ;; Créer une instance de la VM et l'initialiser
-(let  ((vm '()))
-      
+(let  ((vm '())) 
       (vm-init vm)
       
       (print '( test vm-init :) )
@@ -23,22 +22,87 @@
       ;; Vérifier les résultats
       (print '( tests for load and execute :) )
       (print (= (get vm :R1 ) 10)) 
-      (print (= (get-mem vm 10) 10 )) 
-      
-      (print '( cant print the vm dont know why :) )
-      (print vm) ;; ca marche pas!!!!!!!!!!!!!!!!!!!!!!
-      (afficher-registres vm) ;; ca marche pas!!!!!!!!!!!!!!!!!!!!!! jppp!
+      (print (= (get-mem vm 10) 10 ))  
+  )
 
+(let  ((vm '())) 
+      (vm-init vm)
+      (vm-reset vm)
+      (vm-load vm '((LOAD :R1 10 ) (MOVE :R1 :R2) ))
+      (vm-execute  vm)
+
+      ;; Vérifier les résultats
+      (print '( test Move :) )
+      (print (= (vm-get vm :R2) 10))
+  )
+
+(let  ((vm '())) 
+      (vm-init vm)
+      (vm-reset vm)
+      (vm-load vm '((LOAD :R1 10 ) (LOAD :R2 5) (ADD :R1 :R2) ))
+      (vm-execute  vm)
+
+      ;; Vérifier les résultats
+      (print '( test ADD :) )
+      (print (= (vm-get vm :R2) 15))
+  )
+
+(let  ((vm '())) 
+      (vm-init vm)
+      (vm-reset vm)
+      (vm-load vm '((LOAD :R1 10 ) (LOAD :R2 5) (SUB :R1 :R2) ))
+      (vm-execute  vm)
+
+      ;; Vérifier les résultats
+      (print '( test SUB :) )
+      (print (= (vm-get vm :R2) 5))
+  )
+
+(let  ((vm '())) 
+      (vm-init vm)
+      (vm-reset vm)
+      (vm-load vm '((LOAD :R1 10 ) (LOAD :R2 5) (MUL :R1 :R2) ))
+      (vm-execute  vm)
+
+      ;; Vérifier les résultats
+      (print '( test MUL :) )
+      (print (= (vm-get vm :R2) 50))
+  )
+
+(let  ((vm '())) 
+      (vm-init vm)
+      (vm-reset vm)
+      (vm-load vm '((LOAD :R1 10 ) (LOAD :R2 5) (DIV :R1 :R2) ))
+      (vm-execute  vm)
+
+      ;; Vérifier les résultats
+      (print '( test DIV :) )
+      (print (= (vm-get vm :R2) 2))
+  )
+
+(let  ((vm '())) 
+      (vm-init vm)
+      (vm-reset vm)
+      (vm-load vm '((LOAD :R1 10 ) (INCR :R1) ))
+      (vm-execute  vm)
+
+      ;; Vérifier les résultats
+      (print '( test INCR :) )
+      (print (= (vm-get vm :R1) 11))
   )
 
 
 
+#| JMP boucle
+(let  ((vm '())) 
+      (vm-init vm)
+      (vm-reset vm)
+      (vm-load vm '((LOAD :R1 10 ) (INCR :R1)  (INCR :R1) (JMP 998) ))
+      (vm-execute  vm)
 
-
-
-
-
-
-
-
+      ;; Vérifier les résultats
+      (print '( test JMP :) )
+      (print (= (vm-get vm :R1) 14))
+  )
+|#
 
