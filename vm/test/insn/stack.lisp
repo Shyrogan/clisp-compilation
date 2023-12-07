@@ -8,7 +8,7 @@
     (POP R1)
   ))
   (vm-execute vm)
-  (print `(test PUSH/POP : ,(= (attr-get vm :R1) 5)))
+  (format t "Test PUSH/POP CONST: ~A~%" (= (attr-get vm :R1) 5))
 )
 
 ;; Test du stack indirect
@@ -20,5 +20,5 @@
   ))
   (attr-set vm :R0 10)  ; Set R0 value to 10
   (vm-execute vm)
-  (print `(test PUSH/POP : ,(= (attr-get vm :R1) 10)))
+  (format t "Test PUSH/POP: ~A~%" (= (attr-get vm :R1) 10))
 )

@@ -31,14 +31,14 @@
   (attr-set vm :MS val))
 
 (defun is-running(vm)
-  (= (attr-get vm :RUNNING) 1))
+  (equal (attr-get vm :RUNNING) 1))
 
 (defun set-running(vm val)
   (attr-set vm :RUNNING val))
 
 (defun is-vm-attr(val)
   (if (not (listp val))
-    (let ((attributes '("R0" "R1" "R2" "R3" "SP" "BP" "PC" "MS" "FP")))
+    (let ((attributes '("R0" "R1" "R2" "R3" "SP" "BP" "PC" "MS" "FP" "FEQ" "FLT" "FGT")))
       (loop for attr in attributes
             when (equal (string val) attr) do (return t)
             finally (return nil)))))
@@ -54,6 +54,9 @@
     ((equal (string val) "PC") :PC)
     ((equal (string val) "MS") :MS)
     ((equal (string val) "FP") :FP)
+    ((equal (string val) "FEQ") :FEQ)
+    ((equal (string val) "FLT") :FLT)
+    ((equal (string val) "FGT") :FGT)
     (t (format t "Attribut inconnu: ~A~%" val))))
 
 (defun is-jmp (insn)
