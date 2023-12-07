@@ -7,3 +7,6 @@
   (pc-incr vm)
   (pc-decr vm)
   (format t "Test PC-GET, PC-SET, PC-INCR, PC-DECR: ~A~%" (= (pc-get vm) 11)))
+
+(format t "Test IS-JUMP: ~A~%" (is-jmp '(JMP hello)))
+(format t "Test IS-LABEL: ~A~%" (is-label '(LABEL label)))

@@ -2,9 +2,9 @@
 (require "vm/insn/require.lisp")
 
 ;; —————————————   MAX_MEM
-;; Zone code (4/5) PC
+;; Zone code (1/2) PC
 ;; —————————————   MS
-;; Zone pile (1/5) SP
+;; Zone pile (1/2) SP
 ;; —————————————   BP
 ;; Variables basses (30)
 ;; ————————————— 0
@@ -21,7 +21,7 @@
     (pc-set vm (- size 1))               ;; puis on va diminuer dans la mémoire, ça permet de ne pas trop se faire de soucis
     (bp-set vm 30)                       ;; Le BP lui est défini après les variables basses.
     (sp-set vm (bp-get vm))              ;; Le stack pointer est de base sur BP.
-    (ms-set vm (+ 30 (/ tailleZones 5))) ;; s'en suit la valeur maximum du stack qu'on ne doit pas dépasser
+    (ms-set vm (+ 30 (/ tailleZones 2))) ;; s'en suit la valeur maximum du stack qu'on ne doit pas dépasser
     (set-running vm 1)))                 ;; Ainsi pour une VM taille 1000: BP = 30, SP = 30, MS = 224, MAX_MEM = 1000
 
 (defun vm-init(vm &optional (size 1000))
@@ -55,5 +55,7 @@
         ((equal (first insn) 'DIV) (handle-div vm insn))
         ((equal (first insn) 'INCR) (handle-incr vm insn))
         ((equal (first insn) 'DECR) (handle-decr vm insn))
+        ((equal (first insn) 'PUSH) (handle-push vm insn))
+        ((equal (first insn) 'POP) (handle-pop vm insn))
         (t (format t "Instruction inconnue: ~A~%" insn)))
       (pc-decr vm))))
