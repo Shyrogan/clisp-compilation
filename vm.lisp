@@ -11,6 +11,7 @@
         (vm-set vm :PC (- taille 1))
         (vm-set vm :ETIQ (make-hash-table :size taille))
         (vm-set vm :UKNWN_ETIQ (make-hash-table :size taille))
+        (vm-set vm :RUNNING 1)
         ;; (set-etiqNR vm 'nb 0)
          
     )
@@ -102,7 +103,7 @@
 )
 
 (defun vm-execute (vm)
-    (loop while (>= (pc-get vm) (vm-get vm :LAST_CODE))
+    (loop while (and (>= (pc-get vm) (vm-get vm :LAST_CODE)) (= (vm-get vm :RUNNING) 1))
         do (let ((instr (mem-get vm (pc-get vm))))
             (cond
                         ;; Exemple : Si l'instruction est un certain type, effectuez une action.
@@ -326,7 +327,6 @@
   (if (equal (vm-get vm :FEQ) 1)
       (if (listp instr)
           (let ((address (second instr)))
-            (format t "Address: ~A~%" address) ; Print the extracted address for debugging
             (pc-set vm (+ address 1))))))
 
 (defun handle-jne (vm instr)
@@ -335,27 +335,26 @@
           (let ((address (second instr)))
             (pc-set vm (+ address 1))))))
 
-#| pas fini |#
 (defun handle-test (vm instr)
-  ;; Test handling code
+    (let ((reg1 (second instr))
+      (if (null instr)
+        (vm-set vm :FNIL 1)  ; Paramètre NIL, définir FNIL à 1
+        (vm-set vm :FNIL 0)) ; Paramètre non-NIL, définir FNIL à 0
+    ))
 )
 
-#| pas fini |#
 (defun handle-jtrue (vm instr)
   (when (> (vm-get vm (second instr)) 0)
     (vm-set vm :PC (third instr))))
 
-#| pas fini |#
 (defun handle-jnil (vm instr)
   (when (= (vm-get vm (second instr)) 0)
     (vm-set vm :PC (third instr))))
 
-#| pas fini |#
 (defun handle-nop (vm instr)
   ;; NOP handling code
 )
 
-#| pas fini |#
 (defun handle-halt (vm instr)
-  ;; HALT handling code
+  (vm-set vm :RUNNING 0)
 )

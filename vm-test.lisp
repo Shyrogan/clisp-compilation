@@ -222,3 +222,13 @@
   (vm-execute vm)
   (print (vm-get vm :R1))
 )
+
+(let ((vm '()))
+  (vm-init vm)
+  (vm-load vm '(
+    (LOAD (:CONST 10) :R0)
+    (HALT)
+    (INCR :R0)
+  ))
+  (vm-execute vm)
+  (print (vm-get vm :R0)))
