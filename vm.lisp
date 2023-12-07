@@ -16,7 +16,7 @@
     )
 )
 
-(defun vm-init ( vm &optional(size 1000))
+(defun vm-init (vm &optional(size 1000))
     ;; Est-ce que c'est vraiment utile?
     (vm-set vm :NAME vm)
     ;; Registres
@@ -48,23 +48,20 @@
 
 (defun vm-load (vm program)
   ;; Charge un programme dans la mémoire de la machine virtuelle.
-    (let ((mem (vm-get vm :MEM))         ;; Récupère la mémoire de la VM.
-    (initial-pc (vm-get vm :PC)))  ;; Sauvegarde la valeur initiale du PC.
+    (let ((initial-pc (pc-get vm)))  ;; Sauvegarde la valeur initiale du PC.
         (loop for instr in program do
-            (setf (aref mem initial-pc) instr) ;; Place chaque instruction dans la mémoire.
+            (mem-set vm initial-pc instr) ;; Place chaque instruction dans la mémoire.
             (setq initial-pc (- initial-pc 1))  ;; Decrémente la position de la mémoire. 999->998->997
         )
         (vm-set vm :LAST_CODE (+ initial-pc 1)) ;; on a enregistré l'adress de la dernière instruction! et le début 
-        (vm-set vm :PC (vm-get vm :PC))   ;; Réinitialise le PC à la position initiale.
-    )   
+        (pc-set vm (pc-get vm))   ;; Réinitialise le PC à la position initiale.
+    )
 )
 
 (defun vm-execute (vm)
-    ;; Execution Engine: Charge d'éxecuter les instructions une après l'autre 
-    (let ((mem (vm-get vm :MEM)))         ;; Récupère la mémoire de la VM.) 
-        (loop while (>= (vm-get vm :PC) (vm-get vm :LAST_CODE))  ;; Continue tant que PC est dans les limites de la mémoire.
-            do (let ((instr (aref mem (vm-get vm :PC))))  ;; Récupère l'instruction comme une liste!  (LOAD 'R1 10).
-                (cond
+    (loop while (>= (pc-get vm) (vm-get vm :LAST_CODE))
+        do (let ((instr (mem-get vm (pc-get vm))))
+            (cond
                         ;; Exemple : Si l'instruction est un certain type, effectuez une action.
                         ;; Là on compare les instructions
                         ((equal (first instr) 'LOAD) (handle-load vm instr))
@@ -75,6 +72,7 @@
                         ((equal (first instr) 'MUL) (handle-mul vm instr))
                         ((equal (first instr) 'DIV) (handle-div vm instr))
                         ((equal (first instr) 'INCR) (handle-incr vm instr))
+                        ((equal (first instr) 'DECR) (handle-decr vm instr))
                         ((equal (first instr) 'PUSH) (handle-push vm instr))
                         ((equal (first instr) 'POP) (handle-pop vm instr))
                         ((equal (first instr) 'LABEL) (handle-label vm instr))
@@ -98,7 +96,6 @@
                    (vm-set vm :PC (- (vm-get vm :PC) 1))
                 )
             ) 
-    )
  )
 
 (defun handle-load (vm instr)
@@ -123,34 +120,34 @@
     )
 )
 
-(defun handle-move (vm instr) ;;(MOVE 'R1 'R2) copies the value from R1 to R2
+(defun handle-move (vm instr)
   (let ((src-reg (second instr))
         (dest-reg (third instr)))
     (vm-set vm dest-reg (vm-get vm src-reg)))
 )
 
-(defun handle-add (vm instr) ;;(ADD 'R1 'R2) adds the values R1 and R2, storing the result in R2
+(defun handle-add (vm instr)
   (let ((reg1 (second instr))
         (reg2 (third instr)))
-    (vm-set vm reg2 (+ (vm-get vm reg1) (vm-get vm reg2))))
+    (vm-set vm reg2 (+ (vm-get vm reg2) (vm-get vm reg1))))
 )
 
 (defun handle-sub (vm instr)
   (let ((reg1 (second instr))
         (reg2 (third instr)))
-    (vm-set vm reg2 (- (vm-get vm reg1) (vm-get vm reg2))))
+    (vm-set vm reg2 (- (vm-get vm reg2) (vm-get vm reg1))))
 )
 
 (defun handle-mul (vm instr)
   (let ((reg1 (second instr))
         (reg2 (third instr)))
-    (vm-set vm reg2 (* (vm-get vm reg1) (vm-get vm reg2))))
+    (vm-set vm reg2 (* (vm-get vm reg2) (vm-get vm reg1))))
 )
 
 (defun handle-div (vm instr)
     (let ((reg1 (second instr))
         (reg2 (third instr)))
-    (vm-set vm reg2 (/ (vm-get vm reg1) (vm-get vm reg2))))
+    (vm-set vm reg2 (/ (vm-get vm reg2) (vm-get vm reg1))))
 )
 
 (defun handle-incr (vm instr)
@@ -171,21 +168,23 @@
 (defun handle-pop (vm instr)
   (let ((reg (second instr)))
     (let ((sp (vm-get vm :SP)))
-      (vm-set vm reg (get-mem vm (- sp 1)))
+      (vm-set vm reg (mem-get vm (- sp 1)))
       (vm-set vm :SP (- sp 1))))
 )
 
-#| pas fini |#
 (defun handle-label (vm instr)
-  ;; Label handling code
-)
+  (let ((label (string (second instr))))
+    (setf (gethash label (vm-get vm :ETIQ)) (pc-get vm))
+    (format t "Label ~A added with PC value ~A~%" label (pc-get vm))))
 
-#| pas fini (ça boucle) |#
 (defun handle-jmp (vm instr)
-    (let ((target (second instr)))
-    (vm-set vm :PC (+ target 1)) ;; +1 car on fait -1 à la fin de l'execution de chaque instructino 
-    )
-)
+  (let ((label (string (second instr))))
+    (let ((address (gethash label (vm-get vm :ETIQ))))
+      (unless address
+        (format t "Label ~A not found in ETIQ table~%" label))
+      (when address
+        (format t "Jumping to label ~A~%" label)
+        (pc-set vm address)))))
 
 #| pas fini |#
 (defun handle-jsr (vm instr)

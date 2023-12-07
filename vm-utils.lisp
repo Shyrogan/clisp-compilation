@@ -4,14 +4,14 @@
 (defun vm-set (vm attr val)
   (setf (get vm attr) val)) ;; prop c'est attr non?!
 
-(defun get-mem (vm adr)
-  (aref (get vm :MEM) adr))
-
 (defun tab-set(tab cle val)
   (setf (aref tab cle) val))
 
 (defun mem-set(vm adr val)
   (tab-set (get vm :MEM) adr val))
+
+(defun mem-get (vm adr)
+  (aref (get vm :MEM) adr))
 
 (defun pc-get(&optional (vm 'vm))
   (vm-get vm :PC))
