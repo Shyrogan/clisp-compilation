@@ -232,3 +232,58 @@
   ))
   (vm-execute vm)
   (print (vm-get vm :R0)))
+
+
+
+
+  ;;Test handle jtrue
+  (let ((vm '()))
+  (vm-init vm)
+  (vm-load vm '(
+    (LOAD (:CONST 1) :R0)  ; Définir :R0 à 1 (condition vraie)
+    (JTRUE :R0 end)        ; Sauter vers l'étiquette 'end' si :R0 est vrai
+    (LOAD (:CONST 0) :R1)  ; Cette instruction devrait être ignorée
+    (LABEL end)
+    (HALT)
+  ))
+  (vm-execute vm)
+  (print `(test JTRUE, (not (= (vm-get vm :R1) 0)))))
+
+
+
+  ;;Test handle jnil
+(let ((vm '()))
+  (vm-init vm)
+  (vm-load vm '(
+    (LOAD (:CONST 0) :R0)  ; Définir :R0 à 0 (condition fausse)
+    (JNIL :R0 end)         ; Sauter vers l'étiquette 'end' si :R0 est nul
+    (LOAD (:CONST 1) :R1)  ; Cette instruction devrait être ignorée
+    (LABEL end)
+    (HALT)
+  ))
+  (vm-execute vm)
+  (print `(test JNIL, (not (= (vm-get vm :R1) 1)))))
+
+
+  ;;Test handle nop
+  (let ((vm '()))
+  (vm-init vm)
+  (vm-load vm '(
+    (NOP)                  ; Aucune opération
+    (LOAD (:CONST 1) :R1)  ; Cette instruction devrait être exécutée
+    (HALT)
+  ))
+  (vm-execute vm)
+  (print `(test NOP, (= (vm-get vm :R1) 1))))
+
+
+  ;;Test handle halt
+  (let ((vm '()))
+  (vm-init vm)
+  (vm-load vm '(
+    (HALT)
+    (LOAD (:CONST 1) :R1)  ; Cette instruction ne devrait pas être exécutée
+  ))
+  (vm-execute vm)
+  (print `(test HALT, (not (= (vm-get vm :R1) 1)))))
+
