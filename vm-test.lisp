@@ -173,3 +173,52 @@
   (print `(test DIV direct : ,(= (vm-get vm :R2) 3)))
   (print `(test DIV indirect : ,(= (vm-get vm :R1) 2/3)))
 )
+
+;; Test du stack direct
+(let ((vm '()))
+  (vm-init vm)
+  (vm-load vm '(
+    (PUSH (:CONST 5))  ; Push constant 5 onto the stack
+    (POP :R1)  ; Pop the stack into register R1
+  ))
+  (vm-execute vm)
+  (print `(test PUSH/POP : ,(= (vm-get vm :R1) 5)))
+)
+
+;; Test du stack indirect
+(let ((vm '()))
+  (vm-init vm)
+  (vm-load vm '(
+    (PUSH :R0)  ; Push the value in register R0 onto the stack
+    (POP :R1)   ; Pop the stack into register R1
+  ))
+  (vm-set vm :R0 10)  ; Set R0 value to 10
+  (vm-execute vm)
+  (print `(test PUSH/POP : ,(= (vm-get vm :R1) 10)))
+)
+
+;; Factoriel
+(let ((vm '()))
+  ; Initialisation de la machine virtuelle et des instructions
+  (vm-init vm)
+  (vm-load vm '(
+    (LOAD (:CONST 10) :R0)     ; Charge le nombre qu'on veut dans R1 pour le factoriel
+    (LOAD (:CONST 1) :R1)     ; Charge 1 dans R2 pour la multiplication
+    (LOAD (:CONST 1) :R2)     ; Charge 1 dans R3 pour la boucle
+
+    (INCR :R0) ;; En gros si on veut fact(5), il faut itérer de 1 à 6 (5 fois)
+    ; Début de la boucle
+    (LABEL start)
+    (CMP :R2 :R0)
+    (JEQ exit)      ; Si R3 = R1, sortir de la boucle
+    (MUL :R2 :R1)        ; R1 = R1 * R2 (calcul du factoriel)
+    (INCR :R2)               ; Incrémente R2 (incrément pour la boucle)
+    (JMP start)             ; Retour au début de la boucle
+
+    ; Sortie
+    (LABEL exit)
+    (HALT)
+  ))
+  (vm-execute vm)
+  (print (vm-get vm :R1))
+)

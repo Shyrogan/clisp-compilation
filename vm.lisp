@@ -50,8 +50,51 @@
   ;; Charge un programme dans la mémoire de la machine virtuelle.
     (let ((initial-pc (pc-get vm)))  ;; Sauvegarde la valeur initiale du PC.
         (loop for instr in program do
-            (mem-set vm initial-pc instr) ;; Place chaque instruction dans la mémoire.
-            (setq initial-pc (- initial-pc 1))  ;; Decrémente la position de la mémoire. 999->998->997
+            (cond 
+              ((equal (first instr) 'LABEL) (progn (let ((label (string (second instr))))
+                  (setf (gethash label (vm-get vm :ETIQ)) initial-pc)
+                  (format t "Label ~A added with PC value ~A~%" label initial-pc))))
+              (t (progn 
+                (mem-set vm initial-pc instr) ;; Place chaque instruction dans la mémoire.
+                (setq initial-pc (- initial-pc 1))  ;; Decrémente la position de la mémoire. 999->998->997))
+              ))
+            )
+        )
+        (setq initial-pc (pc-get vm))
+        (loop for instr in program do
+          (if (and (listp instr) (eq (first instr) 'JMP))
+              (let* ((label (string (second instr))) (address (gethash label (vm-get vm :ETIQ))))
+                (mem-set vm (+ initial-pc 1) (list 'JMP address))
+                (format t "JUMP towards ~A will jump to ~A~%" label address)))
+          (if (and (listp instr) (eq (first instr) 'JSR))
+              (let* ((label (string (second instr))) (address (gethash label (vm-get vm :ETIQ))))
+                (mem-set vm (+ initial-pc 1) (list 'JSR address))
+                (format t "JSR towards ~A will jump to ~A~%" label address)))
+          (if (and (listp instr) (eq (first instr) 'JLT))
+              (let* ((label (string (second instr))) (address (gethash label (vm-get vm :ETIQ))))
+                (mem-set vm (+ initial-pc 1) (list 'JLT address))
+                (format t "JLT towards ~A will jump to ~A~%" label address)))
+          (if (and (listp instr) (eq (first instr) 'JLE))
+              (let* ((label (string (second instr))) (address (gethash label (vm-get vm :ETIQ))))
+                (mem-set vm (+ initial-pc 1) (list 'JLE address))
+                (format t "JLE towards ~A will jump to ~A~%" label address)))
+          (if (and (listp instr) (eq (first instr) 'JGT))
+              (let* ((label (string (second instr))) (address (gethash label (vm-get vm :ETIQ))))
+                (mem-set vm (+ initial-pc 1) (list 'JGT address))
+                (format t "JGT towards ~A will jump to ~A~%" label address)))
+          (if (and (listp instr) (eq (first instr) 'JGE))
+              (let* ((label (string (second instr))) (address (gethash label (vm-get vm :ETIQ))))
+                (mem-set vm (+ initial-pc 1) (list 'JGE address))
+                (format t "JGE towards ~A will jump to ~A~%" label address)))
+          (if (and (listp instr) (eq (first instr) 'JEQ))
+              (let* ((label (string (second instr))) (address (gethash label (vm-get vm :ETIQ))))
+                (mem-set vm (+ initial-pc 1) (list 'JEQ address))
+                (format t "JEQ towards ~A will jump to ~A~%" label address)))
+          (if (and (listp instr) (eq (first instr) 'JNE))
+              (let* ((label (string (second instr))) (address (gethash label (vm-get vm :ETIQ))))
+                (mem-set vm (+ initial-pc 1) (list 'JNE address))
+                (format t "JNE towards ~A will jump to ~A~%" label address)))
+          (setq initial-pc (- initial-pc 1))
         )
         (vm-set vm :LAST_CODE (+ initial-pc 1)) ;; on a enregistré l'adress de la dernière instruction! et le début 
         (pc-set vm (pc-get vm))   ;; Réinitialise le PC à la position initiale.
@@ -75,7 +118,6 @@
                         ((equal (first instr) 'DECR) (handle-decr vm instr))
                         ((equal (first instr) 'PUSH) (handle-push vm instr))
                         ((equal (first instr) 'POP) (handle-pop vm instr))
-                        ((equal (first instr) 'LABEL) (handle-label vm instr))
                         ((equal (first instr) 'JMP) (handle-jmp vm instr))
                         ((equal (first instr) 'JSR) (handle-jsr vm instr))
                         ((equal (first instr) 'RTN) (handle-rtn vm instr))
@@ -217,48 +259,36 @@
     (vm-set vm reg (- (vm-get vm reg) 1)))
 )
 
-#| pas fini |#
 (defun handle-push (vm instr)
-  (let ((reg (second instr)))
-    (let ((val (vm-get vm reg)))
-      (let ((sp (vm-get vm :SP)))
-        (mem-set vm sp val)
-        (vm-set vm :SP (+ sp 1)))))
+  (let ((src (second instr)))
+    (handle-incr vm (list 'INCR :SP))  ; Increment SP
+    (handle-store vm (list 'STORE src :SP))  ; Store src at the new SP address
+  )
 )
 
-#| pas fini |#
 (defun handle-pop (vm instr)
-  (let ((reg (second instr)))
-    (let ((sp (vm-get vm :SP)))
-      (vm-set vm reg (mem-get vm (- sp 1)))
-      (vm-set vm :SP (- sp 1))))
+  (let ((dest (second instr)))
+    (handle-load vm (list 'LOAD :SP dest))  ; Load the content of SP into dest
+    (handle-decr vm (list 'DECR :SP))  ; Decrement SP
+  )
 )
-
-(defun handle-label (vm instr)
-  (let ((label (string (second instr))))
-    (setf (gethash label (vm-get vm :ETIQ)) (pc-get vm))
-    (format t "Label ~A added with PC value ~A~%" label (pc-get vm))))
 
 (defun handle-jmp (vm instr)
-  (let ((label (string (second instr))))
-    (let ((address (gethash label (vm-get vm :ETIQ))))
-      (unless address
-        (format t "Label ~A not found in ETIQ table~%" label))
-      (when address
-        (pc-set vm address)))))
+  (let ((address (second instr))) ; Assuming the address is directly specified
+    (pc-set vm (+ address 1))))
 
 (defun handle-jsr (vm instr)
   (let ((return-address (+ (pc-get vm) 1))) ; Récupère l'adresse de retour
-    (handle-push vm (list return-address)) ; Empile l'adresse de retour
+    (handle-push vm (list 'PUSH return-address)) ; Empile l'adresse de retour
     (handle-jmp vm instr) ; Effectue le saut vers le label
   )
 )
 
 (defun handle-rtn (vm instr)
-  (let ((return-address (mem-get vm (pc-get vm)))) ; Récupère l'adresse de retour en haut de la pile
-    (pc-inc vm) ; Avance le PC pour pointer vers l'instruction suivante
-    (pc-set vm return-address) ; Saut à l'adresse de retour
-    (vm-set vm :SP (- (vm-get vm :SP) 1)) ; Dépile la valeur de retour
+  (let ((return-address (vm-get vm :SP))) ; Récupère l'adresse en sommet de pile
+    (handle-load vm (list 'LOAD :SP :R0)) ; Charge l'adresse en sommet de pile dans R0
+    (handle-decr vm (list 'DECR :SP))    ; Décrémente SP pour simuler le dépilement
+    (handle-jmp vm (list 'JMP (vm-get vm :R0))) ; Saut vers l'adresse enregistrée dans R0
   )
 )
 
@@ -269,43 +299,41 @@
           (val2 (vm-get vm reg2)))
       (vm-set vm :FEQ (if (= val1 val2) 1 0))
       (vm-set vm :FLT (if (< val1 val2) 1 0))
-      (vm-set vm :FGT (if (> val1 val2) 1 0)))))
+      (vm-set vm :FGT (if (> val1 val2) 1 0))))) ; Print the results of comparison
+
 
 (defun handle-jgt (vm instr)
-  (let ((label (second instr)))
-    (let ((address (gethash label (vm-get vm :ETIQ))))
-      (when (and address (> (vm-get vm :FGT) 0))
-        (pc-set vm address)))))
+  (let ((address (second (instr))))
+    (when (and address (> (vm-get vm :FGT) 0))
+      (pc-set vm (+ address 1)))))
 
 (defun handle-jge (vm instr)
-  (let ((label (second instr)))
-    (let ((address (gethash label (vm-get vm :ETIQ))))
-      (when (or (and address (> (vm-get vm :FGT) 0)) (= (vm-get vm :FEQ) 1))
-        (pc-set vm address)))))
+  (let ((address (second (instr))))
+    (when (or (and address (> (vm-get vm :FGT) 0)) (= (vm-get vm :FEQ) 1))
+      (pc-set vm (+ address 1)))))
 
 (defun handle-jlt (vm instr)
-  (let ((label (second instr)))
-    (let ((address (gethash label (vm-get vm :ETIQ))))
-      (when (and address (< (vm-get vm :FLT) 0))
-        (pc-set vm address)))))
+  (let ((address (second (instr))))
+    (when (and address (< (vm-get vm :FLT) 0))
+      (pc-set vm (+ address 1)))))
 
 (defun handle-jle (vm instr)
-  (let ((label (second instr)))
-    (let ((address (gethash label (vm-get vm :ETIQ))))
-      (when (or (and address (< (vm-get vm :FLT) 0)) (= (vm-get vm :FEQ) 1))
-        (pc-set vm address)))))
+  (let ((address (second (instr))))
+    (when (or (and address (< (vm-get vm :FLT) 0)) (= (vm-get vm :FEQ) 1))
+      (pc-set vm (+ address 1)))))
 
 (defun handle-jeq (vm instr)
-  (let ((label (second instr)))
-    (let ((address (gethash label (vm-get vm :ETIQ))))
-      (when (and address (= (vm-get vm :FEQ) 1))
-        (pc-set vm address)))))
+  (if (equal (vm-get vm :FEQ) 1)
+      (if (listp instr)
+          (let ((address (second instr)))
+            (format t "Address: ~A~%" address) ; Print the extracted address for debugging
+            (pc-set vm (+ address 1))))))
 
 (defun handle-jne (vm instr)
-  (let ((label (second instr)))
-    (let ((address (gethash label (vm-get vm :ETIQ))))
-      (when (and address (/= (vm-get vm :FEQ) 1))
-        (pc-set vm address)))))
+  (if (/= (vm-get vm :FEQ) 1)
+      (if (listp instr)
+          (let ((address (second instr)))
+            (pc-set vm (+ address 1))))))
 
 #| pas fini |#
 (defun handle-test (vm instr)
