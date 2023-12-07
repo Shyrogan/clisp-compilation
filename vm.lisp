@@ -1,6 +1,6 @@
 (require "vm-utils.lisp")
 
-(defun vm-reset ( vm  &optional(size 1000))
+(defun vm-reset (vm  &optional(size 1000))
     ;; On veut une taille d'au moins 1000 su notre VM, histoire qu'elle soit fonctionnelle.
     (let ((taille (max size 1000)))
         ;; On stocke la taille
@@ -99,60 +99,122 @@
  )
 
 (defun handle-load (vm instr)
-  ;; Assume instr is like (LOAD 'R1 10)
-  (let ((reg (second instr))  ;; 'R1
-        (val (third instr)))  ;; 10
-    ;; Execute the load - store `val` in the register `reg`
-    (vm-set vm reg val)
-    (format t "Loaded ~A into ~A~%" val reg))
-)
+  (let ((src (second instr))  ;; Source
+        (dest (third instr))) ;; Destination
+    (cond
+      ;; Si la source est une constante (:CONST constante)
+      ((and (listp src) (eq (first src) :CONST))
+       (vm-set vm dest (second src)))
+
+      ;; Si la source est une adresse mémoire (nombre donc adressage direct)
+      ((numberp src)
+       (vm-set vm dest (mem-get vm src)))
+      
+      ;; Si la source est un registre (indirect)
+      ((symbolp src)
+       (let ((mem-addr (vm-get vm src)))
+         (vm-set vm dest (mem-get vm mem-addr))))
+      
+      ;; Si la source est un registre avec un offset positif
+      ((and (listp src) (eq (first src) '+))
+       (let* ((reg (second src))
+              (offset (third src))
+              (reg-val (vm-get vm reg)))
+         (let ((address (+ reg-val offset)))
+           (vm-set vm dest (mem-get vm address)))))
+      
+      ((and (listp src) (eq (first src) '+))
+       (let* ((reg (second src))
+              (offset (third src))
+              (reg-val (vm-get vm reg)))
+         (let ((address (+ reg-val offset)))
+           (vm-set vm dest (mem-get vm address)))))
+
+      (t (format t "Erreur: Chargement invalide~%")))
+    (format t "Chargement effectué : ~A -> ~A~%" src dest)))
+
 
 (defun handle-store (vm instr)
-    ;; Assume instr is like (STORE 'R1 100)
-    ;; Where 'R1 is the register and 100 is the memory address
-    (let ((reg (second instr))   ;; Extracts the register (e.g., 'R1)
-        (adr (third instr)))   ;; Extracts the memory address (e.g., 100)
-    ;; Retrieve the value stored in the register
-        (let ((val (vm-get vm reg)))
-            ;; Store the value from the register to the specified memory address
-            (mem-set vm adr val)
-            (format t "Stored ~A from ~A to memory address ~A~%" val reg adr))
-    )
-)
+  (let ((src (second instr))   ;; Source
+        (dest (third instr)))  ;; Destination
+    (cond
+      ;; Si la source est une expression d'adresse indexée
+      ((and (listp dest) (eq (first dest) '+))
+        (let ((reg (second dest)) (offset (third dest)))
+          (mem-set vm (+ (vm-get vm reg) offset) (vm-get vm src))))
+
+      ((and (listp dest) (eq (first dest) '-))
+        (let ((reg (second dest)) (offset (third dest)))
+          (mem-set vm (+ (vm-get vm reg) offset) (vm-get vm src))))
+
+      ;; Si la source est une constante (:CONST)
+      ((and (listp src) (eq (first src) :CONST))
+        (mem-set vm (vm-get vm dest) (second src)))
+      
+      ((and (symbolp src) (symbolp dest))
+        (mem-set vm (vm-get vm dest) (vm-get vm src)))
+
+      ;; Si la source est un registre
+      ((and (symbolp src))
+        (mem-set vm dest (vm-get vm src)))
+
+      (t (format t "Erreur: Stockage invalide~%")))
+    (format t "Stockage effectué : ~A -> ~A~%" src dest)))
+
 
 (defun handle-move (vm instr)
-  (let ((src-reg (second instr))
-        (dest-reg (third instr)))
-    (vm-set vm dest-reg (vm-get vm src-reg)))
-)
+  (let ((src (second instr))   ;; Source
+        (dest (third instr)))  ;; Destination
+    (cond
+      ;; Si la source est une constante (:CONST)
+      ((and (listp src) (eq (first src) :CONST))
+       (vm-set vm dest (second src)))
+
+      ;; Si la source est un registre
+      ((symbolp src)
+       (vm-set vm dest (vm-get vm src)))
+
+      (t (format t "Erreur: Mouvement invalide~%")))
+    (format t "Mouvement effectué : ~A -> ~A~%" src dest)))
+
 
 (defun handle-add (vm instr)
   (let ((reg1 (second instr))
         (reg2 (third instr)))
-    (vm-set vm reg2 (+ (vm-get vm reg2) (vm-get vm reg1))))
-)
+    (if (listp reg1)
+        (vm-set vm reg2 (+ (vm-get vm reg2) (second reg1)))
+        (vm-set vm reg2 (+ (vm-get vm reg2) (vm-get vm reg1))))))
 
+        
 (defun handle-sub (vm instr)
   (let ((reg1 (second instr))
         (reg2 (third instr)))
-    (vm-set vm reg2 (- (vm-get vm reg2) (vm-get vm reg1))))
-)
+    (if (listp reg1)
+        (vm-set vm reg2 (- (vm-get vm reg2) (second reg1)))
+        (vm-set vm reg2 (- (vm-get vm reg2) (vm-get vm reg1))))))
 
 (defun handle-mul (vm instr)
   (let ((reg1 (second instr))
         (reg2 (third instr)))
-    (vm-set vm reg2 (* (vm-get vm reg2) (vm-get vm reg1))))
-)
+    (if (listp reg1)
+        (vm-set vm reg2 (* (vm-get vm reg2) (second reg1)))
+        (vm-set vm reg2 (* (vm-get vm reg2) (vm-get vm reg1))))))
 
 (defun handle-div (vm instr)
-    (let ((reg1 (second instr))
+  (let ((reg1 (second instr))
         (reg2 (third instr)))
-    (vm-set vm reg2 (/ (vm-get vm reg2) (vm-get vm reg1))))
-)
+    (if (listp reg1)
+        (vm-set vm reg2 (/ (vm-get vm reg2) (second reg1)))
+        (vm-set vm reg2 (/ (vm-get vm reg2) (vm-get vm reg1))))))
 
 (defun handle-incr (vm instr)
   (let ((reg (second instr)))
     (vm-set vm reg (+ (vm-get vm reg) 1)))
+)
+
+(defun handle-decr (vm instr)
+  (let ((reg (second instr)))
+    (vm-set vm reg (- (vm-get vm reg) 1)))
 )
 
 #| pas fini |#
@@ -183,65 +245,67 @@
       (unless address
         (format t "Label ~A not found in ETIQ table~%" label))
       (when address
-        (format t "Jumping to label ~A~%" label)
         (pc-set vm address)))))
 
-#| pas fini |#
 (defun handle-jsr (vm instr)
-  ;; JSR handling code
+  (let ((return-address (+ (pc-get vm) 1))) ; Récupère l'adresse de retour
+    (handle-push vm (list return-address)) ; Empile l'adresse de retour
+    (handle-jmp vm instr) ; Effectue le saut vers le label
+  )
 )
 
-#| pas fini |#
 (defun handle-rtn (vm instr)
-  ;; RTN handling code
+  (let ((return-address (mem-get vm (pc-get vm)))) ; Récupère l'adresse de retour en haut de la pile
+    (pc-inc vm) ; Avance le PC pour pointer vers l'instruction suivante
+    (pc-set vm return-address) ; Saut à l'adresse de retour
+    (vm-set vm :SP (- (vm-get vm :SP) 1)) ; Dépile la valeur de retour
+  )
 )
 
-#| pas fini |#
 (defun handle-cmp (vm instr)
   (let ((reg1 (second instr))
         (reg2 (third instr)))
     (let ((val1 (vm-get vm reg1))
           (val2 (vm-get vm reg2)))
-      (vm-set vm :FEQ (= val1 val2))
-      (vm-set vm :FLT (< val1 val2))
-      (vm-set vm :FGT (> val1 val2))))
-)
+      (vm-set vm :FEQ (if (= val1 val2) 1 0))
+      (vm-set vm :FLT (if (< val1 val2) 1 0))
+      (vm-set vm :FGT (if (> val1 val2) 1 0)))))
 
-#| pas fini |#
 (defun handle-jgt (vm instr)
-  (when (> (vm-get vm :FGT) 0)
-    (vm-set vm :PC (second instr)))
-)
+  (let ((label (second instr)))
+    (let ((address (gethash label (vm-get vm :ETIQ))))
+      (when (and address (> (vm-get vm :FGT) 0))
+        (pc-set vm address)))))
 
-#| pas fini |#
 (defun handle-jge (vm instr)
-  (when (or (> (vm-get vm :FGT) 0) (= (vm-get vm :FEQ) 1))
-    (vm-set vm :PC (second instr)))
-)
+  (let ((label (second instr)))
+    (let ((address (gethash label (vm-get vm :ETIQ))))
+      (when (or (and address (> (vm-get vm :FGT) 0)) (= (vm-get vm :FEQ) 1))
+        (pc-set vm address)))))
 
-#| pas fini |#
 (defun handle-jlt (vm instr)
-  (when (< (vm-get vm :FLT) 0)
-    (vm-set vm :PC (second instr)))
-)
+  (let ((label (second instr)))
+    (let ((address (gethash label (vm-get vm :ETIQ))))
+      (when (and address (< (vm-get vm :FLT) 0))
+        (pc-set vm address)))))
 
-#| pas fini |#
 (defun handle-jle (vm instr)
-  (when (or (< (vm-get vm :FLT) 0) (= (vm-get vm :FEQ) 1))
-    (vm-set vm :PC (second instr)))
-)
+  (let ((label (second instr)))
+    (let ((address (gethash label (vm-get vm :ETIQ))))
+      (when (or (and address (< (vm-get vm :FLT) 0)) (= (vm-get vm :FEQ) 1))
+        (pc-set vm address)))))
 
-#| pas fini |#
 (defun handle-jeq (vm instr)
-  (when (= (vm-get vm :FEQ) 1)
-    (vm-set vm :PC (second instr)))
-)
+  (let ((label (second instr)))
+    (let ((address (gethash label (vm-get vm :ETIQ))))
+      (when (and address (= (vm-get vm :FEQ) 1))
+        (pc-set vm address)))))
 
-#| pas fini |#
 (defun handle-jne (vm instr)
-  (when (/= (vm-get vm :FEQ) 1)
-    (vm-set vm :PC (second instr)))
-)
+  (let ((label (second instr)))
+    (let ((address (gethash label (vm-get vm :ETIQ))))
+      (when (and address (/= (vm-get vm :FEQ) 1))
+        (pc-set vm address)))))
 
 #| pas fini |#
 (defun handle-test (vm instr)
