@@ -38,7 +38,7 @@
 
 (defun is-vm-attr(val)
   (if (not (listp val))
-    (let ((attributes '("R0" "R1" "R2" "R3" "SP" "BP" "PC" "MS" "FP" "FEQ" "FLT" "FGT")))
+    (let ((attributes '("R0" "R1" "R2" "SP" "BP" "PC" "MS" "FP" "FEQ" "FLT" "FGT")))
       (loop for attr in attributes
             when (equal (string val) attr) do (return t)
             finally (return nil)))))
@@ -48,7 +48,6 @@
     ((equal (string val) "R0") :R0)
     ((equal (string val) "R1") :R1)
     ((equal (string val) "R2") :R2)
-    ((equal (string val) "R3") :R3)
     ((equal (string val) "SP") :SP)
     ((equal (string val) "BP") :BP)
     ((equal (string val) "PC") :PC)
