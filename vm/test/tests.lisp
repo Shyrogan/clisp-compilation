@@ -3,6 +3,7 @@
 (require "vm/test/insn/reg.lisp")
 (require "vm/test/insn/stack.lisp")
 (require "vm/test/insn/vm.lisp")
+(require "vm/test/insn/jump-cmp.lisp")
 (require "vm/test/utils/array.lisp")
 (require "vm/test/utils/attr.lisp")
 (require "vm/test/utils/map.lisp")

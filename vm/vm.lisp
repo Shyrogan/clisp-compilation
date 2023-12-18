@@ -13,7 +13,6 @@
     (attr-set vm :R0 0)
     (attr-set vm :R1 0)
     (attr-set vm :R2 0)
-    (attr-set vm :R3 0)
     (attr-set vm :MAX_MEM size)          ;; Définition de la taille de la VM
     (attr-array-init vm :MEM size)       ;; Définition de la mémoire
     (attr-set vm :START_CODE (- size 1)) ;; Les instructions du code commence en haut de la mémoire,
@@ -22,7 +21,7 @@
     (pc-set vm (- size 1))               ;; puis on va diminuer dans la mémoire, ça permet de ne pas trop se faire de soucis
     (bp-set vm 30)                       ;; Le BP lui est défini après les variables basses.
     (sp-set vm (bp-get vm))              ;; Le stack pointer est de base sur BP.
-    (ms-set vm (+ 30 (/ tailleZones 2))) ;; s'en suit la valeur maximum du stack qu'on ne doit pas dépasser
+    (ms-set vm (+ variablesBasse (/ tailleZones 2))) ;; s'en suit la valeur maximum du stack qu'on ne doit pas dépasser
     (set-running vm 1)))                 ;; Ainsi pour une VM taille 1000: BP = 30, SP = 30, MS = 224, MAX_MEM = 1000
 
 (defun vm-init(vm &optional (size 1000))
