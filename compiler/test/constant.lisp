@@ -1,4 +1,4 @@
-(require "compilator/compilator.lisp")
+(require "compiler/compiler.lisp")
 (require "vm/vm.lisp")
 
 (let ((vm '()) (program '10))
