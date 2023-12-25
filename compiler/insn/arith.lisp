@@ -38,7 +38,7 @@
      (comp (car operands))
      (comp (cadr operands))
      ;; Effectuer la comparaison
-     '((POP R0) (POP R1) (CMP R1 R0))
+     '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
      `((JGE ,etiq-true)
        (MOVE (:CONST 0) R0)
@@ -58,7 +58,7 @@
      ;; Effectuer la comparaison
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
-     `((JGE ,etiq-true)
+     `((JLE ,etiq-true)
        (MOVE (:CONST 0) R0)
        (JMP ,etiq-end)
        (LABEL ,etiq-true)
@@ -75,7 +75,7 @@
      ;; Effectuer la comparaison
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
-     `((JGE ,etiq-true)
+     `((JLT ,etiq-true)
        (MOVE (:CONST 0) R0)
        (JMP ,etiq-end)
        (LABEL ,etiq-true)
@@ -92,7 +92,7 @@
      ;; Effectuer la comparaison
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
-     `((JGE ,etiq-true)
+     `((JGT ,etiq-true)
        (MOVE (:CONST 0) R0)
        (JMP ,etiq-end)
        (LABEL ,etiq-true)
@@ -109,7 +109,7 @@
      ;; Effectuer la comparaison
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
-     `((JGE ,etiq-true)
+     `((JEQ ,etiq-true)
        (MOVE (:CONST 0) R0)
        (JMP ,etiq-end)
        (LABEL ,etiq-true)
