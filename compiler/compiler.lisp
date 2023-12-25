@@ -20,6 +20,8 @@
        ((equal (first expr) '<) (comp-lt (cdr expr)))
        ((equal (first expr) 'progn) (comp-seq (cdr expr)))
        ((equal (first expr) 'if) (comp-if (cdr expr)))
+       ((equal (first expr) 'defun) (comp-defun expr))
+       ((symbolp (first expr)) (comp-call expr))
        (t (format t "Expression impossible à compiler: ~A~%" (first expr))) ; Gestion des erreurs
      ))
   )

@@ -16,16 +16,31 @@
         (etiq-else (generate-label))
         (etiq-end (generate-label)))
     (append
-     ;; Compile la condition
      (comp condition)
-     ;; Compare le résultat et saute à etiq-else si faux
      `((CMP (:CONST 0) R0) (JEQ ,etiq-else))
-     ;; Compile la branche 'then'
      (comp then-part)
-     ;; Saute à la fin après le bloc 'then'
      `((JMP ,etiq-end))
-     ;; Étiquette et bloc 'else'
      `((LABEL ,etiq-else))
-     (when else-part (comp else-part))  ; Compile le bloc 'else' s'il existe
-     ;; Étiquette de fin
+     (when else-part (comp else-part))
      `((LABEL ,etiq-end)))))
+
+(defun comp-while (expr)
+  (let ((test (first expr))
+        (body (second expr))
+        (etiq-boucle (generate-label))
+        (etiq-fin (generate-label)))
+    (append
+     `((LABEL ,etiq-boucle))
+     (comp test)
+     `((CMP (:CONST 0) R0) (JEQ R0 ,etiq-fin))
+     (comp body)
+     `((JMP ,etiq-boucle))
+     `((LABEL ,etiq-fin)))))
+
+(defun comp-defun (expr)
+  (let ((proc (second expr))
+        (body (third expr)))
+    (append
+     `((LABEL ,proc))
+     (comp body)
+     '((RTN)))))
