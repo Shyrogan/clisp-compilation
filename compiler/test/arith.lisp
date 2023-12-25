@@ -14,3 +14,10 @@
   (vm-execute vm)
   (format t "Une expression complexe avec variable ~A = 140: ~A~%" program (= 140 (attr-get vm :R0)))
 )
+
+(let ((vm '()) (program '(>= 3 1)))
+  (vm-init vm)
+  (vm-load vm (comp program))
+  (vm-execute vm)
+  (format t "Une comparaison ~A: ~A~%" program (= 1 (attr-get vm :R0)))
+)
