@@ -21,6 +21,7 @@
        ((equal (first expr) 'progn) (comp-seq (cdr expr)))
        ((equal (first expr) 'if) (comp-if (cdr expr)))
        ((equal (first expr) 'while) (comp-while (cdr expr)))
+       ((equal (first expr) 'for) (comp-for (cdr expr)))
        ((equal (first expr) 'setf) (comp-setf (cdr expr)))
       ;;  ((equal (first expr) 'defun) (comp-defun expr))
       ;;  ((symbolp (first expr)) (comp-call expr))
