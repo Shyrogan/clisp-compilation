@@ -1,34 +1,42 @@
-(defun comp-add(operands)
-  (let ((instructions '()))
-    (when operands
-      (setq instructions (append instructions (comp (cadr operands)))) ; Compile the second operand
-      (setq instructions (append instructions (comp (car operands)))) ; Compile the first operand
-      (setq instructions (append instructions '((POP R0) (POP R1) (ADD R1 R0) (PUSH R0))))) ; Perform subtraction
-    instructions))
+(defun comp-add (operands)
+  (let ((op1 (first operands))
+        (op2 (second operands)))
+    (if (and (atom op1) (atom op2))
+        (let ((result (+ op1 op2)))
+          `((MOVE (:CONST ,result) R0) (PUSH R0)))
+        (append (comp op1)
+                (comp op2)
+                '((POP R1) (POP R0) (ADD R1 R0) (PUSH R0))))))
 
-(defun comp-sub(operands)
-  (let ((instructions '()))
-    (when operands
-      (setq instructions (append instructions (comp (cadr operands)))) ; Compile the second operand
-      (setq instructions (append instructions (comp (car operands)))) ; Compile the first operand
-      (setq instructions (append instructions '((POP R0) (POP R1) (SUB R1 R0) (PUSH R0))))) ; Perform subtraction
-    instructions))
+(defun comp-sub (operands)
+  (let ((op1 (first operands))
+        (op2 (second operands)))
+    (if (and (atom op1) (atom op2))
+        (let ((result (- op1 op2)))
+          `((MOVE (:CONST ,result) R0) (PUSH R0)))
+        (append (comp op1)
+                (comp op2)
+                '((POP R1) (POP R0) (SUB R1 R0) (PUSH R0))))))
 
 (defun comp-mul(operands)
-  (let ((instructions '()))
-    (when operands
-      (setq instructions (append instructions (comp (cadr operands)))) ; Compile the second operand
-      (setq instructions (append instructions (comp (car operands)))) ; Compile the first operand
-      (setq instructions (append instructions '((POP R0) (POP R1) (MUL R1 R0) (PUSH R0))))) ; Perform subtraction
-    instructions))
+  (let ((op1 (first operands))
+        (op2 (second operands)))
+    (if (and (atom op1) (atom op2))
+        (let ((result (* op1 op2)))
+          `((MOVE (:CONST ,result) R0) (PUSH R0)))
+        (append (comp op1)
+                (comp op2)
+                '((POP R1) (POP R0) (MUL R1 R0) (PUSH R0))))))
 
 (defun comp-div(operands)
-  (let ((instructions '()))
-    (when operands
-      (setq instructions (append instructions (comp (cadr operands)))) ; Compile the second operand
-      (setq instructions (append instructions (comp (car operands)))) ; Compile the first operand
-      (setq instructions (append instructions '((POP R0) (POP R1) (DIV R1 R0) (PUSH R0))))) ; Perform subtraction
-    instructions))
+  (let ((op1 (first operands))
+        (op2 (second operands)))
+    (if (and (atom op1) (atom op2))
+        (let ((result (/ op1 op2)))
+          `((MOVE (:CONST ,result) R0) (PUSH R0)))
+        (append (comp op1)
+                (comp op2)
+                '((POP R1) (POP R0) (DIV R1 R0) (PUSH R0))))))
 
 (defun comp-ge(operands)
   (let ((etiq-true (generate-label))

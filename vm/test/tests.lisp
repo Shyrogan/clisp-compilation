@@ -6,6 +6,5 @@
 (require "vm/test/insn/jump-cmp.lisp")
 (require "vm/test/utils/array.lisp")
 (require "vm/test/utils/attr.lisp")
-(require "vm/test/utils/map.lisp")
 (require "vm/test/utils/mem.lisp")
 (require "vm/test/utils/vm.lisp")

@@ -4,7 +4,7 @@
 (require "compiler/utils/label.lisp")
 
 (defun comp(expr)
-  (cond
+  (let ((ctx '())) (cond
     ((atom expr) (comp-const expr))  ; Compilation des constantes
     ((stringp expr) (comp-var expr)) ; Compilation des variables
     ((listp expr)                    ; Compilation des expressions de liste
@@ -22,5 +22,5 @@
        ((equal (first expr) 'if) (comp-if (cdr expr)))
        (t (format t "Expression impossible à compiler: ~A~%" (first expr))) ; Gestion des erreurs
      ))
-  )
+  ))
 )

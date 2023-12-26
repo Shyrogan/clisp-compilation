@@ -24,18 +24,6 @@
 (defun sp-set(vm val)
   (attr-set vm :SP val))
 
-(defun ms-get(vm)
-  (attr-get vm :MS))
-
-(defun ms-set(vm val)
-  (attr-set vm :MS val))
-
-(defun is-running(vm)
-  (equal (attr-get vm :RUNNING) 1))
-
-(defun set-running(vm val)
-  (attr-set vm :RUNNING val))
-
 (defun is-vm-attr(val)
   (if (not (listp val))
     (let ((attributes '("R0" "R1" "R2" "SP" "BP" "PC" "MS" "FP" "FEQ" "FLT" "FGT")))
@@ -51,8 +39,6 @@
     ((equal (string val) "SP") :SP)
     ((equal (string val) "BP") :BP)
     ((equal (string val) "PC") :PC)
-    ((equal (string val) "MS") :MS)
-    ((equal (string val) "FP") :FP)
     ((equal (string val) "FEQ") :FEQ)
     ((equal (string val) "FLT") :FLT)
     ((equal (string val) "FGT") :FGT)
@@ -65,3 +51,49 @@
 
 (defun is-label(insn)
   (equal (first insn) 'LABEL))
+
+(defconstant +start-code-id+ 0)
+(defconstant +last-code-id+ 1)
+(defconstant +etiq-id+ 2)
+(defconstant +is-running-id+ 3)
+(defconstant +ms-id+ 4)
+
+(defun var-basse-get (vm id)
+  (mem-get vm id))
+
+(defun var-basse-set (vm id val)
+  (mem-set vm id val))
+
+(defun is-running(vm)
+  (equal (var-basse-get vm +is-running-id+) 1))
+
+(defun set-running(vm val)
+  (var-basse-set vm +is-running-id+ val))
+
+(defun ms-get(vm)
+  (var-basse-get vm +ms-id+))
+
+(defun ms-set(vm val)
+  (var-basse-set vm +ms-id+ val))
+
+(defun update-labels-for-jumps (vm)
+  (let ((etiq-table (etiq-get-table vm))
+        (last-code (var-basse-get vm +last-code-id+))
+        (pc (pc-get vm)))
+    (loop for addr from last-code to pc do
+      (let ((insn (mem-get vm addr)))
+        (when (and insn (is-jmp insn))
+          (let ((label (second insn)))
+            (let ((label-addr (etiq-get vm label)))
+              (if label-addr
+                (mem-set vm addr (list (first insn) label-addr))))))))))
+
+(defun etiq-get-table (vm)
+  (var-basse-get vm +etiq-id+))
+
+(defun etiq-get (vm label)
+  (gethash (string label) (etiq-get-table vm)))
+
+(defun etiq-set (vm label addr)
+  (let ((etiq-table (etiq-get-table vm)))
+    (setf (gethash (string label) etiq-table) addr)))

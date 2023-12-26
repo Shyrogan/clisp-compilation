@@ -5,6 +5,7 @@
   (vm-init vm)
   (vm-load vm (comp program))
   (vm-execute vm)
+  (format t "~A~%" (comp program))
   (format t "Une expression complexe ~A = 140: ~A~%" program (= 140 (attr-get vm :R0)))
 )
 
