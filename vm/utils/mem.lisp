@@ -9,5 +9,8 @@
 (defun is-const(val)
   (and (listp val) (equal (first val) :CONST)))
 
+(defun is-global-var(val)
+  (and (listp val) (equal (first val) :@)))
+
 (defun is-offset(val)
   (and (listp val) (equal (string (first val)) '"+") (is-vm-attr (second val))))

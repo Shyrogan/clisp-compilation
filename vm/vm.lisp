@@ -29,29 +29,36 @@
   (vm-reset vm))
 
 (defun vm-load (vm program)
-    (let ((initial-pc (pc-get vm)))
-        ;; Première itération sur le programme
+    ;; Détermine l'adresse de départ pour charger le programme
+    (let ((initial-pc (or (attr-get vm :LAST_CODE) (pc-get vm))))
+        ;; Charge les instructions et les labels
         (loop for insn in program do
             (if (is-label insn)
-              ;; Si c'est un label, on le stock dans le registre à label
-              (progn
-                (attr-map-set vm :ETIQ (string (second insn)) initial-pc))
-              ;; Sinon, on le met en mémoire et décrémente PC
-              (progn 
-                (mem-set vm initial-pc insn)
-                (setq initial-pc (- initial-pc 1)))))
-        (setq initial-pc (pc-get vm))
-        (loop for insn in program do
-          ;; Remplace les sauts par des sauts vers des adresses
-          (if (is-jmp insn)
-            (mem-set vm initial-pc (list (first insn) (attr-map-get vm :ETIQ (string (second insn))))))
-          ;; On décrémente uniquement si ce n'est pas un label
-          (if (not (is-label insn))
-            (setq initial-pc (- initial-pc 1))))
+                ;; Si c'est un label, stocke son adresse dans la table des labels
+                (attr-map-set vm :ETIQ (string (second insn)) initial-pc)
+                ;; Sinon, stocke l'instruction en mémoire et met à jour initial-pc
+                (progn 
+                    (mem-set vm initial-pc insn)
+                    (setq initial-pc (- initial-pc 1)))))
+
+        ;; Met à jour :LAST_CODE
         (attr-set vm :LAST_CODE (+ initial-pc 1))
-        (pc-set vm (pc-get vm))
-    )
-)
+
+        ;; Mise à jour des adresses pour les sauts
+        (update-labels-for-jumps vm)))
+
+(defun update-labels-for-jumps (vm)
+    (let ((pc (pc-get vm)))
+        ;; Parcourt la mémoire de la VM pour trouver les instructions de saut
+        (loop for addr from (attr-get vm :LAST_CODE) to pc do
+            (let ((insn (mem-get vm addr)))
+                (when (and insn (is-jmp insn))
+                    ;; La variable label est définie ici
+                    (let ((label (second insn)))
+                        (let ((label-addr (attr-map-get vm :ETIQ (string label))))
+                            ;; Si le label est trouvé, met à jour l'instruction de saut
+                            (if label-addr
+                                (mem-set vm addr (list (first insn) label-addr))))))))))
 
 (defun vm-execute (vm)
   (loop while (and (>= (pc-get vm) (attr-get vm :LAST_CODE)) (is-running vm)) do

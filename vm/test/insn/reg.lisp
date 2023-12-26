@@ -10,3 +10,13 @@
   (vm-execute vm)
   (format t "Test MOVE CONST: ~A~%" (= (attr-get vm :R0) 10))
   (format t "Test MOVE: ~A~%" (= (attr-get vm :R2) 10)))
+
+;; Différents MOVE
+(let (vm '())
+  (vm-init vm)
+  (attr-map-set vm :ETIQ 'a 10)
+  (vm-load vm '(
+    (MOVE (:@ a) R0)
+  ))
+  (vm-execute vm)
+  (format t "Test MOVE GLOBAL VAR: ~A~%" (= (attr-get vm :R0) 10)))

@@ -1,2 +1,2 @@
-# clisp (vm & compilator)
+# clisp (vm & compiler)
 
