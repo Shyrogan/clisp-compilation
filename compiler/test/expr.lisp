@@ -7,3 +7,10 @@
   (vm-execute vm)
   (format t "Expression constante: ~A" (= (attr-get vm :R0) 10))
 )
+
+(let ((vm '()) (program '(progn (setf count 10) (+ count 10))))
+  (vm-init vm)
+  (vm-load vm (comp program))
+  (vm-execute vm)
+  (format t "Expression constante: ~A" (= (attr-get vm :R0) 20))
+)
