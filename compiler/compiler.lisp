@@ -1,6 +1,7 @@
 (require "compiler/insn/arith.lisp")
 (require "compiler/insn/control.lisp")
 (require "compiler/insn/expr.lisp")
+(require "compiler/insn/optimizer.lisp")
 (require "compiler/utils/label.lisp")
 (require "compiler/utils/optimizer.lisp")
 
@@ -36,28 +37,16 @@
     ((atom expr) expr)
 
     ;; Simplify comparisons
-    ((member (car expr) '(< <= = /= > >=))
-     (let ((operands (mapcar #'optimize-expr (cdr expr))))
-          (if (every #'numberp operands)            ;; if the parameter are constants
-               (if (apply (car expr) (cdr expr)) t nil) ;;the apply the comparision 
-                    (cons (car expr) operands))) )   ;; if not just keep it as it is with it's simplified parameters
+    ((member (car expr) '(< <= = /= > >=)) (optim-comp expr) )   
 
     ;; Simplify arithmetic operations
-    ((member (car expr) '(+ - * /))
-     (let ((operands (mapcar #'optimize-expr (cdr expr))))
-       (if (every #'numberp operands)   ;; if the parameter are constants
-           (eval (cons (car expr) operands))   ;; then do the math
-               (cons (car expr) operands))))   ;; if not just put it as it is 
+    ((member (car expr) '(+ - * /)) (optim-arith expr))  
 
     ;; Simplify 'if' expressions
-    ((equal (car expr) 'if) 
-     (let ((test-part (optimize-expr (second expr)))
-           (then-part (optimize-expr (third expr)))
-           (else-part (optimize-expr (fourth expr))))
-           (if ( booleanp test-part )                 ;; if the test is boolean 
-           (if (eq test-part t) then-part else-part) ;; the condition can be deleted 
-           (list 'if test-part then-part else-part ) ) ) ) ;;if not we will put the condition with simplified then and else if possible
+    ((equal (car expr) 'if) (optim-if expr))
     
     ;; Default case: Optimize all sub-expressions (applies a given function (here, #'optimize-expr) to each element of a list and returns a new list of the results.)
-    (t (mapcar #'optimize-expr expr))))  
+    (t (mapcar #'optimize-expr expr))
+  )
+)  
       
