@@ -14,7 +14,7 @@
 ;; Différents MOVE
 (let (vm '())
   (vm-init vm)
-  (attr-map-set vm :ETIQ 'a 10)
+  (etiq-set vm 'a 10)
   (vm-load vm '(
     (MOVE (:@ a) R0)
   ))
