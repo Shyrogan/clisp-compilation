@@ -1,7 +1,5 @@
 (require "vm/vm.lisp")
 
-
-
 ;; Différents store
 (let (vm '())
   (vm-init vm)

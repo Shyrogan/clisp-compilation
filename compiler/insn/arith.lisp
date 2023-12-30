@@ -1,50 +1,30 @@
-(defun comp-add (operands)
-  (let ((op1 (first operands))
-        (op2 (second operands)))
-    (if (and (numberp op1) (numberp op2))
-        (let ((result (+ op1 op2)))
-          `((MOVE (:CONST ,result) R0) (PUSH R0)))
-        (append (comp op1)
-                (comp op2)
-                '((POP R1) (POP R0) (ADD R1 R0) (PUSH R0))))))
+(defun comp-add (operands ctx)
+  (append (comp (first operands) ctx)
+          (comp (second operands) ctx)
+          '((POP R1) (POP R0) (ADD R1 R0) (PUSH R0))))
 
-(defun comp-sub (operands)
-  (let ((op1 (first operands))
-        (op2 (second operands)))
-    (if (and (numberp op1) (numberp op2))
-        (let ((result (- op1 op2)))
-          `((MOVE (:CONST ,result) R0) (PUSH R0)))
-        (append (comp op1)
-                (comp op2)
-                '((POP R1) (POP R0) (SUB R1 R0) (PUSH R0))))))
+(defun comp-sub (operands ctx)
+  (append (comp (first operands) ctx)
+          (comp (second operands) ctx)
+          '((POP R1) (POP R0) (SUB R1 R0) (PUSH R0))))
 
-(defun comp-mul(operands)
-  (let ((op1 (first operands))
-        (op2 (second operands)))
-    (if (and (numberp op1) (numberp op2))
-        (let ((result (* op1 op2)))
-          `((MOVE (:CONST ,result) R0) (PUSH R0)))
-        (append (comp op1)
-                (comp op2)
-                '((POP R1) (POP R0) (MUL R1 R0) (PUSH R0))))))
+(defun comp-mul (operands ctx)
+  (append (comp (first operands) ctx)
+          (comp (second operands) ctx)
+          '((POP R1) (POP R0) (MUL R1 R0) (PUSH R0))))
 
-(defun comp-div(operands)
-  (let ((op1 (first operands))
-        (op2 (second operands)))
-    (if (and (numberp op1) (numberp op2))
-        (let ((result (/ op1 op2)))
-          `((MOVE (:CONST ,result) R0) (PUSH R0)))
-        (append (comp op1)
-                (comp op2)
-                '((POP R1) (POP R0) (DIV R1 R0) (PUSH R0))))))
+(defun comp-div (operands ctx)
+  (append (comp (first operands) ctx)
+          (comp (second operands) ctx)
+          '((POP R1) (POP R0) (DIV R1 R0) (PUSH R0))))
 
-(defun comp-ge(operands)
+(defun comp-ge(operands ctx)
   (let ((etiq-true (generate-label))
         (etiq-end (generate-label)))
     (append
      ;; Compiler les opérandes
-     (comp (car operands))
-     (comp (cadr operands))
+     (comp (car operands) ctx)
+     (comp (cadr operands) ctx)
      ;; Effectuer la comparaison
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
@@ -56,13 +36,13 @@
        (LABEL ,etiq-end))
 )))
 
-(defun comp-le (operands)
+(defun comp-le (operands ctx)
   (let ((etiq-true (generate-label))
         (etiq-end (generate-label)))
     (append
      ;; Compiler les opérandes
-     (comp (car operands))
-     (comp (cadr operands))
+     (comp (car operands) ctx)
+     (comp (cadr operands) ctx)
      ;; Effectuer la comparaison
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
@@ -73,13 +53,13 @@
        (MOVE (:CONST 1) R0)
        (LABEL ,etiq-end)))))
 
-(defun comp-lt (operands)
+(defun comp-lt (operands ctx)
   (let ((etiq-true (generate-label))
         (etiq-end (generate-label)))
     (append
      ;; Compiler les opérandes
-     (comp (car operands))
-     (comp (cadr operands))
+     (comp (car operands) ctx)
+     (comp (cadr operands) ctx)
      ;; Effectuer la comparaison
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
@@ -90,13 +70,13 @@
        (MOVE (:CONST 1) R0)
        (LABEL ,etiq-end)))))
 
-(defun comp-gt (operands)
+(defun comp-gt (operands ctx)
   (let ((etiq-true (generate-label))
         (etiq-end (generate-label)))
     (append
      ;; Compiler les opérandes
-     (comp (car operands))
-     (comp (cadr operands))
+     (comp (car operands) ctx)
+     (comp (cadr operands) ctx)
      ;; Effectuer la comparaison
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
@@ -107,13 +87,13 @@
        (MOVE (:CONST 1) R0)
        (LABEL ,etiq-end)))))
 
-(defun comp-eq (operands)
+(defun comp-eq (operands ctx)
   (let ((etiq-true (generate-label))
         (etiq-end (generate-label)))
     (append
      ;; Compiler les opérandes
-     (comp (car operands))
-     (comp (cadr operands))
+     (comp (car operands) ctx)
+     (comp (cadr operands) ctx)
      ;; Effectuer la comparaison
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0

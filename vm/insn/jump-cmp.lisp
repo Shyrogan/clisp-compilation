@@ -1,8 +1,12 @@
 (defun handle-jmp (vm insn)
-  (pc-set vm (+ (second insn) 1)))
+  (let ((target (second insn)))
+    (if (numberp target)
+        (pc-set vm (+ target 1))
+        (pc-set vm (+ (attr-get vm (to-vm-attr target)) 1)))))
 
 (defun handle-jsr (vm insn)
-  (handle-push vm (list 'PUSH (+ (pc-get vm) 1)))
+  (attr-set vm :R1 (- (pc-get vm) 1))
+  (handle-push vm '(PUSH R1))
   (handle-jmp vm insn))
 
 (defun handle-cmp (vm insn)

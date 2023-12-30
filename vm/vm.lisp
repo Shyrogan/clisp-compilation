@@ -16,11 +16,11 @@
     (attr-set vm :MAX_MEM size)          ;; Définition de la taille de la VM
     (attr-array-init vm :MEM size)       ;; Définition de la mémoire
     (var-basse-set vm +start-code-id+ (- size 1))
-    (var-basse-set vm +last-code-id+ (- size 1))
     (var-basse-set vm +etiq-id+ (make-hash-table))
     (pc-set vm (- size 1))               ;; puis on va diminuer dans la mémoire, ça permet de ne pas trop se faire de soucis
     (bp-set vm 30)                       ;; Le BP lui est défini après les variables basses.
     (sp-set vm (bp-get vm))              ;; Le stack pointer est de base sur BP.
+    (fp-set vm (sp-get vm))
     (ms-set vm (+ variablesBasse (/ tailleZones 2))) ;; s'en suit la valeur maximum du stack qu'on ne doit pas dépasser
     (set-running vm 1)))                 ;; Ainsi pour une VM taille 1000: BP = 30, SP = 30, MS = 224, MAX_MEM = 1000
 
@@ -30,7 +30,7 @@
 
 (defun vm-load (vm program)
     ;; Détermine l'adresse de départ pour charger le programme
-  (let ((initial-pc (or (var-basse-get vm +last-code-id+) (pc-get vm))))
+  (let ((initial-pc (- (or (var-basse-get vm +last-code-id+) (+ (pc-get vm) 1)) 1)))
         ;; Charge les instructions et les labels
         (loop for insn in program do
             (if (is-label insn)
@@ -50,6 +50,7 @@
 (defun vm-execute (vm)
   (loop while (and (>= (pc-get vm) (var-basse-get vm +last-code-id+)) (is-running vm)) do
     (let ((insn (mem-get vm (pc-get vm))))
+      (if (is-debug vm) (format t "~A " insn))
       (cond
         ((equal (first insn) 'LOAD) (handle-load vm insn))
         ((equal (first insn) 'STORE) (handle-store vm insn))
@@ -77,4 +78,12 @@
         ((equal (first insn) 'JNIL) (handle-jnil vm insn))
         ((equal (first insn) 'JTRUE) (handle-jtrue vm insn))
         (t (format t "Instruction inconnue: ~A~%" insn)))
-      (pc-decr vm))))
+      (pc-decr vm)
+      (if (is-debug vm)
+        (format t "R0: ~A R1: ~A R2: ~A SP: ~A FP: ~A Stack: ~A~%"
+                (attr-get vm :R0)
+                (attr-get vm :R1)
+                (attr-get vm :R2)
+                (attr-get vm :SP)
+                (attr-get vm :FP)
+                (stack-get vm))))))

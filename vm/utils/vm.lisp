@@ -1,5 +1,11 @@
 (require "vm/utils/attr.lisp")
 
+(defun is-debug(vm)
+  (attr-get vm :DEBUG))
+
+(defun set-debug(vm)
+  (attr-set vm :DEBUG t))
+
 (defun pc-get(vm)
   (attr-get vm :PC))
 
@@ -24,6 +30,12 @@
 (defun sp-set(vm val)
   (attr-set vm :SP val))
 
+(defun fp-get(vm)
+  (attr-get vm :FP))
+
+(defun fp-set(vm val)
+  (attr-set vm :FP val))
+
 (defun is-vm-attr(val)
   (if (not (listp val))
     (let ((attributes '("R0" "R1" "R2" "SP" "BP" "PC" "MS" "FP" "FEQ" "FLT" "FGT")))
@@ -39,6 +51,7 @@
     ((equal (string val) "SP") :SP)
     ((equal (string val) "BP") :BP)
     ((equal (string val) "PC") :PC)
+    ((equal (string val) "FP") :FP)
     ((equal (string val) "FEQ") :FEQ)
     ((equal (string val) "FLT") :FLT)
     ((equal (string val) "FGT") :FGT)
@@ -82,7 +95,7 @@
         (pc (pc-get vm)))
     (loop for addr from last-code to pc do
       (let ((insn (mem-get vm addr)))
-        (when (and insn (is-jmp insn))
+        (when (and insn (is-jmp insn) (or (symbolp (second insn)) (stringp (second insn))))
           (let ((label (second insn)))
             (let ((label-addr (etiq-get vm label)))
               (if label-addr
@@ -97,3 +110,9 @@
 (defun etiq-set (vm label addr)
   (let ((etiq-table (etiq-get-table vm)))
     (setf (gethash (string label) etiq-table) addr)))
+
+(defun stack-get (vm)
+  (let ((bp (attr-get vm :BP))  ; Récupère la valeur de BP
+        (sp (attr-get vm :SP))  ; Récupère la valeur de SP
+        (mem (attr-get vm :mem)))  ; Récupère la mémoire complète
+    (subseq mem (+ bp 1) (1+ sp))))  ; Renvoie la partie de la mémoire de BP à SP inclus

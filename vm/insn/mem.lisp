@@ -8,6 +8,8 @@
       ((is-offset src)
         (let ((offset (third src)) (attr (to-vm-attr (second src))))
           (attr-set vm (to-vm-attr dst) (mem-get vm (+ (attr-get vm attr) offset)))))
+      ((is-global-var src)
+        (attr-set vm (to-vm-attr dst) (etiq-get vm (second src))))
       (t (format t "La source doit-être soit un nombre, soit un registre, soit un offset: ~A~%" insn))
     )))
 

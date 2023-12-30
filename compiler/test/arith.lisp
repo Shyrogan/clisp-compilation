@@ -19,5 +19,5 @@
   (vm-init vm)
   (vm-load vm (comp program))
   (vm-execute vm)
-  (format t "Une comparaison ~A: ~A~%" program (= 1 (attr-get vm :R0)))
+  (format t "Une comparaison ~A: ~A~%" program (attr-get vm :R0))
 )
