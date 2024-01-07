@@ -3,6 +3,7 @@
 (require "compiler/insn/expr.lisp")
 (require "compiler/insn/fun.lisp")
 (require "compiler/insn/optimizer.lisp")
+(require "compiler/insn/logique.lisp")
 (require "compiler/utils/label.lisp")
 (require "compiler/utils/optimizer.lisp")
 
@@ -32,7 +33,7 @@
        ((equal (first expr) 'let) (comp-let (second expr) (third expr) ctx))
        ((equal (first expr) 'defun) (comp-fun (second expr) (third expr) (fourth expr) ctx))
        ((symbolp (first expr)) (comp-call (first expr) (rest expr) ctx))
-       (t (format t "Expression impossible à compiler: ~A~%" (first expr))) ; Gestion des erreurs
+       (t (format t "Expression impossible à compiler: ~A~%" expr)) ; Gestion des erreurs
      ))
   )
 )
