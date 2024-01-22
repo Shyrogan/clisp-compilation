@@ -5,9 +5,14 @@
         (pc-set vm (+ (attr-get vm (to-vm-attr target)) 1)))))
 
 (defun handle-jsr (vm insn)
-  (attr-set vm :R1 (- (pc-get vm) 1))
-  (handle-push vm '(PUSH R1))
-  (handle-jmp vm insn))
+  ;; Extraire l'étiquette de l'instruction
+  (let ((label (second insn)))
+    (if (or (numberp label) (is-etiq-set vm label))
+        (progn
+          (attr-set vm :R1 (- (pc-get vm) 1))
+          (handle-push vm '(PUSH R1))
+          (handle-jmp vm insn))
+        (error "Etiquette non définie: ~a" label))))
 
 (defun handle-cmp (vm insn)
   (let ((reg1 (second insn))

@@ -19,28 +19,26 @@
 
 (defun extend-context-with-bindings (bindings ctx)
   (let ((extended-ctx ctx)
-        (offset (+ (length ctx) 1)))  ; Détermine la position de départ pour les nouvelles variables
-    (dolist (binding bindings extended-ctx)
-      (let ((var-name (first binding)))
-        (setq extended-ctx (cons (cons var-name offset) extended-ctx))
-        (incf offset)))))  ; Augmente l'offset pour la prochaine variable
+        (max-offset (reduce (lambda (acc binding)
+                              (max acc (cdr binding)))
+                            ctx :initial-value 0)))
+    (let ((offset (1+ max-offset)))
+      (dolist (binding bindings extended-ctx)
+        (let ((var-name (first binding)))
+          (setq extended-ctx (cons (cons var-name offset) extended-ctx))
+          (incf offset))))))
+
 
 (defun comp-let (bindings body ctx)
   (let ((new-ctx (extend-context-with-bindings bindings ctx))
         (binding-instrs '())
         (cleanup-instrs '()))
-    (setq binding-instrs (append '(
-      (PUSH FP)
-      (MOVE SP FP)
-    ) binding-instrs))
-
+    
     (dolist (binding bindings)
       (setq binding-instrs (append binding-instrs
                                    (comp (second binding) ctx))))
-                                  
+    
     (let ((body-instrs (comp body new-ctx)))
       (dotimes (i (length bindings))
         (setq cleanup-instrs (append '((POP R1)) cleanup-instrs)))
-      (setq cleanup-instrs (append '((POP FP)) cleanup-instrs))
-
       (append binding-instrs body-instrs cleanup-instrs))))

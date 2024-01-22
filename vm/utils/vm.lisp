@@ -111,6 +111,12 @@
   (let ((etiq-table (etiq-get-table vm)))
     (setf (gethash (string label) etiq-table) addr)))
 
+(defun is-etiq-set (vm label)
+  (let ((etiq-table (etiq-get-table vm)))
+    (if (gethash (string label) etiq-table)
+        t
+        nil)))
+
 (defun stack-get (vm)
   (let ((bp (attr-get vm :BP))  ; Récupère la valeur de BP
         (sp (attr-get vm :SP))  ; Récupère la valeur de SP
