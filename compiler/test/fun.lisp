@@ -39,9 +39,29 @@
 
 (let (
   (vm '())
+  (func '(defun fibonacci (n) (
+    if (= n 0) 0
+      (if (<= n 2) 1
+        (+ (fibonacci (- n 2)) (fibonacci (- n 1)))
+      )
+  )))
   (call '(fibonacci 15))
+)
+  (vm-init vm)
+  (vm-load vm (comp func))
+  (vm-load vm (comp call))
+  (vm-execute vm)
+
+  (format t "Fibonacci: ~A~%" (= 610 (attr-get vm :R0)))
+)
+
+(let (
+  (vm '())
+  (call '(numberp 10))
 )
   (vm-init vm)
   (vm-load vm (comp call))
   (vm-execute vm)
+
+  (format t "Zaza: ~A~%" (attr-get vm :R0))
 )

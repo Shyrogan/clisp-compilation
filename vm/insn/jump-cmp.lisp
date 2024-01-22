@@ -9,10 +9,29 @@
   (let ((label (second insn)))
     (if (or (numberp label) (is-etiq-set vm label))
         (progn
+          ;; Si l'étiquette est définie, continuer avec l'exécution normale
           (attr-set vm :R1 (- (pc-get vm) 1))
           (handle-push vm '(PUSH R1))
           (handle-jmp vm insn))
-        (error "Etiquette non définie: ~a" label))))
+        ;; Gérer le cas où l'étiquette n'est pas définie
+        (if (fboundp (intern (string-upcase label)))
+            (progn
+              ;; Si label est une fonction Lisp, récupérer les arguments et appeler la fonction
+              (let ((args '()))
+                ;; Récupérer le nombre d'arguments du stack
+                (handle-pop vm '(POP R1))
+                (let ((arg-count (attr-get vm :R1)))
+                  ;; Récupérer les arguments du stack
+                  (dotimes (i arg-count)
+                    (handle-pop vm '(POP R1))
+                    (push (attr-get vm :R1) args))
+                  ;; Appeler la fonction Lisp avec les arguments et stocker le résultat dans R0
+                  (let ((result (apply (intern (string-upcase label)) (nreverse args))))
+                    (attr-set vm :R0 result)
+                    ;; Pusher le résultat sur la pile
+                    (handle-push vm '(PUSH R0))))))
+            ;; Sinon, signaler une erreur
+            (error "Etiquette non définie: ~a" label)))))
 
 (defun handle-cmp (vm insn)
   (let ((reg1 (second insn))
