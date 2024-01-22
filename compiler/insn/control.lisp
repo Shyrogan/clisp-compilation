@@ -19,7 +19,7 @@
      ;; Compile la condition
      (comp condition ctx)
      ;; Compare le résultat et saute à etiq-else si faux
-     `((CMP (:CONST 0) R0) (JEQ ,etiq-else))
+     `((CMP (:CONST nil) R0) (JEQ ,etiq-else))
      ;; Compile la branche 'then'
      (comp then-part ctx)
      ;; Saute à la fin après le bloc 'then'

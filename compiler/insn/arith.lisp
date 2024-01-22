@@ -29,10 +29,10 @@
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
      `((JGE ,etiq-true)
-       (MOVE (:CONST 0) R0)
+       (MOVE (:CONST nil) R0)
        (JMP ,etiq-end)
        (LABEL ,etiq-true)
-       (MOVE (:CONST 1) R0)
+       (MOVE (:CONST t) R0)
        (LABEL ,etiq-end))
 )))
 
@@ -47,10 +47,10 @@
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
      `((JLE ,etiq-true)
-       (MOVE (:CONST 0) R0)
+       (MOVE (:CONST nil) R0)
        (JMP ,etiq-end)
        (LABEL ,etiq-true)
-       (MOVE (:CONST 1) R0)
+       (MOVE (:CONST t) R0)
        (LABEL ,etiq-end)))))
 
 (defun comp-lt (operands ctx)
@@ -64,10 +64,10 @@
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
      `((JLT ,etiq-true)
-       (MOVE (:CONST 0) R0)
+       (MOVE (:CONST nil) R0)
        (JMP ,etiq-end)
        (LABEL ,etiq-true)
-       (MOVE (:CONST 1) R0)
+       (MOVE (:CONST t) R0)
        (LABEL ,etiq-end)))))
 
 (defun comp-gt (operands ctx)
@@ -81,10 +81,10 @@
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
      `((JGT ,etiq-true)
-       (MOVE (:CONST 0) R0)
+       (MOVE (:CONST nil) R0)
        (JMP ,etiq-end)
        (LABEL ,etiq-true)
-       (MOVE (:CONST 1) R0)
+       (MOVE (:CONST t) R0)
        (LABEL ,etiq-end)))))
 
 (defun comp-eq (operands ctx)
@@ -98,8 +98,8 @@
      '((POP R1) (POP R0) (CMP R0 R1))
      ;; Utiliser les sauts conditionnels pour définir R0
      `((JEQ ,etiq-true)
-       (MOVE (:CONST 0) R0)
+       (MOVE (:CONST nil) R0)
        (JMP ,etiq-end)
        (LABEL ,etiq-true)
-       (MOVE (:CONST 1) R0)
+       (MOVE (:CONST t) R0)
        (LABEL ,etiq-end)))))

@@ -37,12 +37,23 @@
   (let ((reg1 (second insn))
         (reg2 (third insn)))
     (let ((val1 (cond 
-            ((is-const reg1) (second reg1))
-            ((is-vm-attr reg1) (attr-get vm (to-vm-attr reg1)))))
-          (val2 (attr-get vm (to-vm-attr reg2))))
-      (attr-set vm :FEQ (if (= val1 val2) 1 0))
-      (attr-set vm :FLT (if (< val1 val2) 1 0))
-      (attr-set vm :FGT (if (> val1 val2) 1 0)))))
+                  ((is-const reg1) (second reg1))
+                  ((is-vm-attr reg1) (attr-get vm (to-vm-attr reg1)))))
+          (val2 (cond 
+                  ((is-const reg2) (second reg2))
+                  ((is-vm-attr reg2) (attr-get vm (to-vm-attr reg2))))))
+      ;; Gérer les cas où val1 ou val2 sont t ou nil
+      (cond ((or (eq val1 't) (eq val1 'nil) (eq val2 't) (eq val2 'nil))
+             ;; Comparaison d'égalité seulement
+             (attr-set vm :FEQ (if (eq val1 val2) 1 0))
+             (attr-set vm :FLT 0)
+             (attr-set vm :FGT 0))
+            ;; Cas normal
+            (t
+             (attr-set vm :FEQ (if (= val1 val2) 1 0))
+             (attr-set vm :FLT (if (< val1 val2) 1 0))
+             (attr-set vm :FGT (if (> val1 val2) 1 0)))))))
+
 
 (defun handle-jgt (vm insn)
   (if (eq (attr-get vm :FGT) 1)
