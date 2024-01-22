@@ -3,7 +3,8 @@
 (require "compiler/insn/expr.lisp")
 (require "compiler/insn/fun.lisp")
 (require "compiler/insn/optimizer.lisp")
-(require "compiler/insn/logique.lisp")
+(require "compiler/insn/logic.lisp")
+(require "compiler/insn/vars.lisp")
 (require "compiler/utils/label.lisp")
 (require "compiler/utils/optimizer.lisp")
 
@@ -19,7 +20,7 @@
        ((equal (first expr) '*) (comp-mul (cdr expr) ctx))
        ((equal (first expr) '>=) (comp-ge (cdr expr) ctx))
        ((equal (first expr) '<=) (comp-le (cdr expr) ctx))
-       ((equal (first expr) '=) (comp-eq (cdr expr) ctx))
+       ((or (equal (first expr) 'equal) (equal (first expr) '=)) (comp-eq (cdr expr) ctx))
        ((equal (first expr) '>) (comp-gt (cdr expr) ctx))
        ((equal (first expr) '<) (comp-lt (cdr expr) ctx))
        ((equal (first expr) 'and) (comp-and (cdr expr) ctx))
