@@ -1,7 +1,7 @@
 (defun extend-context-with-params(params ctx)
   (let ((offset (length ctx)))
     (dolist (param params ctx)
-      (setq ctx (cons (cons param (- offset 2)) ctx))
+      (setq ctx (cons (cons param (- offset 3)) ctx))
       (decf offset))))
 
 (defun comp-fun (fun-name params body ctx)
@@ -24,12 +24,16 @@
     ;; Compiler les arguments et les ajouter à call-instrs
     (dolist (arg args)
       (setq call-instrs (append call-instrs (comp arg ctx))))
+    ;; Ajouter le nombre d'arguments
+    (let ((nbArg (length args)))
+      (setq call-instrs (append call-instrs `((MOVE (:CONST ,nbArg) R0) (PUSH R0)))))
 
     ;; Ajouter l'adresse de retour et l'instruction JSR à call-instrs
     (setq call-instrs (append call-instrs `((JSR ,fun-name))))
 
     (dolist (arg args)
       (setq call-instrs (append call-instrs '((POP R1)))))
+    (setq call-instrs (append call-instrs `((POP R1))))
     (setq call-instrs (append call-instrs '((PUSH R0))))
 
     ;; Retourner les instructions de l'appel de fonction
