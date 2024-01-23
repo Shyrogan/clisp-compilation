@@ -36,26 +36,20 @@
 (defun fp-set(vm val)
   (attr-set vm :FP val))
 
-(defun is-vm-attr(val)
-  (if (not (listp val))
-    (let ((attributes '("R0" "R1" "R2" "SP" "BP" "PC" "MS" "FP" "FEQ" "FLT" "FGT")))
-      (loop for attr in attributes
-            when (equal (string val) attr) do (return t)
-            finally (return nil)))))
+;; Initialisation de la table de hachage des attributs de VM
+(defvar *vm-attr-hash* (let ((table (make-hash-table :test 'equal)))
+                         (dolist (attr '("R0" "R1" "R2" "SP" "BP" "PC" "MS" "FP" "FEQ" "FLT" "FGT"))
+                           (setf (gethash attr table) t))
+                         table))
+
+(defun is-vm-attr (val)
+  ;; Vérifie si val est un attribut de VM valide.
+  ;; Convertit val en chaîne et recherche dans la table de hachage.
+  (and (not (listp val)) (gethash (string-upcase val) *vm-attr-hash*)))
 
 (defun to-vm-attr (val)
-  (cond
-    ((equal (string val) "R0") :R0)
-    ((equal (string val) "R1") :R1)
-    ((equal (string val) "R2") :R2)
-    ((equal (string val) "SP") :SP)
-    ((equal (string val) "BP") :BP)
-    ((equal (string val) "PC") :PC)
-    ((equal (string val) "FP") :FP)
-    ((equal (string val) "FEQ") :FEQ)
-    ((equal (string val) "FLT") :FLT)
-    ((equal (string val) "FGT") :FGT)
-    (t (format t "Attribut inconnu: ~A~%" val))))
+  ;; Convertit une chaîne (par ex. "R0") en symbole de mot-clé (par ex. :R0).
+  (intern (string-upcase val) 'KEYWORD))
 
 (defun is-jmp (insn)
   (if (member (first insn) '(JMP JSR JGT JGE JLT JLE JEQ JNE JTRUE JNIL))

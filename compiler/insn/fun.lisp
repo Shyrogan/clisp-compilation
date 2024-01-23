@@ -11,8 +11,8 @@
         (cleanup-instrs '()))
 
     ;; Assemblage des instructions de la fonction
-    (append `((LABEL ,entry-label))
-            `((CMP BP SP) (JEQ ,exit-label))
+    (append `((JMP ,exit-label)
+            (LABEL ,entry-label))
             `((PUSH FP) (MOVE SP FP))
             (comp body new-ctx)
             cleanup-instrs

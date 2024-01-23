@@ -1,37 +1,27 @@
-(defun handle-add(vm insn)
-  (let ((src (second insn)) (dst (third insn)))
-    (cond
-      ((is-const src) (attr-set vm (to-vm-attr dst)
-        (+ (attr-get vm (to-vm-attr dst)) (second src))))
-      ((is-vm-attr src) (attr-set vm (to-vm-attr dst)
-        (+ (attr-get vm (to-vm-attr dst)) (attr-get vm (to-vm-attr src))))))))
+(defun perform-arithmetic-op (vm src dst op)
+  (let ((src-value (if (is-const src) (second src) (attr-get vm (to-vm-attr src))))
+        (dst-value (attr-get vm (to-vm-attr dst))))
+    (attr-set vm (to-vm-attr dst) (funcall op dst-value src-value))))
 
-(defun handle-sub(vm insn)
-  (let ((src (second insn)) (dst (third insn)))
-    (cond
-      ((is-const src) (attr-set vm (to-vm-attr dst)
-        (- (attr-get vm (to-vm-attr dst)) (second src))))
-      ((is-vm-attr src) (attr-set vm (to-vm-attr dst)
-        (- (attr-get vm (to-vm-attr dst)) (attr-get vm (to-vm-attr src))))))))
+(defun handle-add (vm insn)
+  (perform-arithmetic-op vm (second insn) (third insn) #'+))
 
-(defun handle-mul(vm insn)
-  (let ((src (second insn)) (dst (third insn)))
-    (cond
-      ((is-const src) (attr-set vm (to-vm-attr dst)
-        (* (attr-get vm (to-vm-attr dst)) (second src))))
-      ((is-vm-attr src) (attr-set vm (to-vm-attr dst)
-        (* (attr-get vm (to-vm-attr dst)) (attr-get vm (to-vm-attr src))))))))
+(defun handle-sub (vm insn)
+  (perform-arithmetic-op vm (second insn) (third insn) #'-))
 
-(defun handle-div(vm insn)
-  (let ((src (second insn)) (dst (third insn)))
-    (cond
-      ((is-const src) (attr-set vm (to-vm-attr dst)
-        (/ (attr-get vm (to-vm-attr dst)) (second src))))
-      ((is-vm-attr src) (attr-set vm (to-vm-attr dst)
-        (/ (attr-get vm (to-vm-attr dst)) (attr-get vm (to-vm-attr src))))))))
+(defun handle-mul (vm insn)
+  (perform-arithmetic-op vm (second insn) (third insn) #'*))
 
-(defun handle-incr(vm insn)
-  (if (is-vm-attr (second insn)) (attr-set vm (to-vm-attr (second insn)) (+ (attr-get vm (to-vm-attr (second insn))) 1))))
+(defun handle-div (vm insn)
+  (perform-arithmetic-op vm (second insn) (third insn) #'/))
 
-(defun handle-decr(vm insn)
-  (if (is-vm-attr (second insn)) (attr-set vm (to-vm-attr (second insn)) (- (attr-get vm (to-vm-attr (second insn))) 1))))
+(defun handle-incr-decr (vm insn op)
+  (let ((attr (to-vm-attr (second insn))))
+    (if (is-vm-attr attr)
+        (attr-set vm attr (funcall op (attr-get vm attr) 1)))))
+
+(defun handle-incr (vm insn)
+  (handle-incr-decr vm insn #'+))
+
+(defun handle-decr (vm insn)
+  (handle-incr-decr vm insn #'-))
