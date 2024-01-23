@@ -45,7 +45,10 @@
   (cond
     ((atom expr) expr)
     ((member (car expr) '(< <= = /= > >=)) (optim-comp expr) )   
-    ((member (car expr) '(+ - * /)) (optim-arith expr))  
+    ((member (car expr) '(+ - * /)) (optim-arith expr)) 
+    ((equal (car expr) 'and) (optim-and expr)) 
+    ((equal (car expr) 'or) (optim-or expr)) 
+    ((equal (car expr) 'not) (optim-not expr)) 
     ((equal (car expr) 'if) (optim-if expr))    
     (t (mapcar #'optimize-expr expr))
   )
