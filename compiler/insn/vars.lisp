@@ -6,13 +6,15 @@
         ;; Charger une variable globale
         `((LOAD (:@ ,var) R0) (PUSH R0)))))
 
-(defun comp-setf(operands ctx)
-  ;; operands est de la forme (variable valeur)
-  (let ((variable (string (first operands)))  ; Le nom de la variable
-        (valeur (second operands)))   ; La valeur à assigner
-    (append
-     (comp valeur)
-     `((STORE R0 (:@ ,variable)))))) 
+(defun comp-setf (operands ctx)
+  (let ((variable (first operands))
+        (valeur (second operands)))
+    (let ((local-var-offset (assoc variable ctx)))
+      (append
+       (comp valeur ctx) ; Assurez-vous que cette opération place le résultat dans R0
+       (if local-var-offset
+           `((STORE R0 (+ FP ,(cdr local-var-offset))))
+           `((STORE R0 (:@ ,variable))))))))
 
 (defun extend-context-with-bindings (bindings ctx)
   (let ((extended-ctx ctx)

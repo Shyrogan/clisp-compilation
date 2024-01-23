@@ -19,17 +19,16 @@
               ;; Si label est une fonction Lisp, récupérer les arguments et appeler la fonction
               (let ((args '()))
                 ;; Récupérer le nombre d'arguments du stack
-                (handle-pop vm '(POP R1))
-                (let ((arg-count (attr-get vm :R1)))
+                (let ((arg-count (mem-get vm (attr-get vm :SP))))
                   ;; Récupérer les arguments du stack
-                  (dotimes (i arg-count)
-                    (handle-pop vm '(POP R1))
-                    (push (attr-get vm :R1) args))
+                    (dotimes (i arg-count)
+                    (let ((arg-value (mem-get vm (- (attr-get vm :SP) (+ i 1)))))
+                      (if (is-debug vm)
+                          (format t "Arg: ~A~%" arg-value))
+                      (push arg-value args)))
                   ;; Appeler la fonction Lisp avec les arguments et stocker le résultat dans R0
-                  (let ((result (apply (intern (string-upcase label)) (nreverse args))))
-                    (attr-set vm :R0 result)
-                    ;; Pusher le résultat sur la pile
-                    (handle-push vm '(PUSH R0))))))
+                  (let ((result (apply (intern (string-upcase label)) args)))
+                    (attr-set vm :R0 result)))))
             ;; Sinon, signaler une erreur
             (error "Etiquette non définie: ~a" label)))))
 

@@ -55,7 +55,7 @@
 
 (let (
   (vm '())
-  (call '(if (numberp 10) 3 0))
+  (call '(if (numberp 1) 3 0))
 )
   (vm-init vm)
   (vm-load vm (comp call))
