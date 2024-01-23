@@ -1,6 +1,7 @@
-(defun handle-move(vm insn)
+(defun handle-move (vm insn)
   (let ((src (second insn)) (dst (third insn)))
     (cond
-      ((is-const src) (attr-set vm (to-vm-attr dst) (second src)))
-      ((is-global-var src) (attr-set vm (to-vm-attr dst) (etiq-get vm (second src))))
-      ((is-vm-attr src) (attr-set vm (to-vm-attr dst) (attr-get vm (to-vm-attr src)))))))
+      ((is-const src) (attr-set vm dst (second src)))
+      ((is-global-var src) (attr-set vm dst (etiq-get vm (second src))))
+      ((keywordp src) (attr-set vm dst (attr-get vm src))))))
+  

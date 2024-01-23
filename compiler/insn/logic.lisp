@@ -6,11 +6,11 @@
         (second-expr (second expr)))
         (append
            (comp first-expr ctx)
-          `((CMP (:CONST nil) R0) (JEQ ,etiq-false)) ;; jump si exp1 est false
+          `((CMP (:CONST nil) :R0) (JEQ ,etiq-false)) ;; jump si exp1 est false
            (comp second-expr ctx)
-          `((CMP (:CONST nil) R0) (JEQ ,etiq-false)) ;; jump si exp2 est false
-          `((MOVE (:CONST t) R0) (JMP ,etiq-end) (PUSH R0)) ;; les deux sont true donc R0 =1
-          `((LABEL ,etiq-false) (MOVE (:CONST 0) R0) (PUSH R0)) ;; Il y a au moins un qui est faux donc R0=0
+          `((CMP (:CONST nil) :R0) (JEQ ,etiq-false)) ;; jump si exp2 est false
+          `((MOVE (:CONST t) :R0) (JMP ,etiq-end) (PUSH :R0)) ;; les deux sont true donc R0 =1
+          `((LABEL ,etiq-false) (MOVE (:CONST 0) :R0) (PUSH :R0)) ;; Il y a au moins un qui est faux donc R0=0
           `((LABEL ,etiq-end))   
        )
     )
@@ -24,11 +24,11 @@
         (second-expr (second expr)))
         (append
            (comp first-expr ctx)
-          `((CMP (:CONST t) R0) (JEQ ,etiq-true)) ;; jump si exp1 est true
+          `((CMP (:CONST t) :R0) (JEQ ,etiq-true)) ;; jump si exp1 est true
            (comp second-expr ctx)
-          `((CMP (:CONST t) R0) (JEQ ,etiq-true)) ;; jump si exp2 est true
-          `((MOVE (:CONST nil) R0) (JMP ,etiq-end) (PUSH R0)) ;; les deux sont fausse donc R0 =0
-          `((LABEL ,etiq-true) (MOVE (:CONST 1) R0) (PUSH R0)) ;; Il y a au moins un qui est true donc R0=1
+          `((CMP (:CONST t) :R0) (JEQ ,etiq-true)) ;; jump si exp2 est true
+          `((MOVE (:CONST nil) :R0) (JMP ,etiq-end) (PUSH :R0)) ;; les deux sont fausse donc R0 =0
+          `((LABEL ,etiq-true) (MOVE (:CONST 1) :R0) (PUSH :R0)) ;; Il y a au moins un qui est true donc R0=1
           `((LABEL ,etiq-end))   
        )
     )
@@ -41,9 +41,9 @@
         (etiq-end (generate-label)))
         (append
            (comp first-expr ctx)
-          `((CMP (:CONST t) R0) (JEQ ,etiq-true)) ;; jump si exp1 est true
-          `((MOVE (:CONST nil) R0) (JMP ,etiq-end) (PUSH R0)) ;; retourne 1 si n'était pas true (donc false) et jump end 
-          `((LABEL ,etiq-true) (MOVE (:CONST nil) R0) (PUSH R0)) ;; retourne 0 si était true
+          `((CMP (:CONST t) :R0) (JEQ ,etiq-true)) ;; jump si exp1 est true
+          `((MOVE (:CONST nil) :R0) (JMP ,etiq-end) (PUSH :R0)) ;; retourne 1 si n'était pas true (donc false) et jump end 
+          `((LABEL ,etiq-true) (MOVE (:CONST nil) :R0) (PUSH :R0)) ;; retourne 0 si était true
           `((LABEL ,etiq-end))   
     )
     )

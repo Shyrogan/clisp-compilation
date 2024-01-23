@@ -36,21 +36,6 @@
 (defun fp-set(vm val)
   (attr-set vm :FP val))
 
-;; Initialisation de la table de hachage des attributs de VM
-(defvar *vm-attr-hash* (let ((table (make-hash-table :test 'equal)))
-                         (dolist (attr '("R0" "R1" "R2" "SP" "BP" "PC" "MS" "FP" "FEQ" "FLT" "FGT"))
-                           (setf (gethash attr table) t))
-                         table))
-
-(defun is-vm-attr (val)
-  ;; Vérifie si val est un attribut de VM valide.
-  ;; Convertit val en chaîne et recherche dans la table de hachage.
-  (and (not (listp val)) (gethash (string-upcase val) *vm-attr-hash*)))
-
-(defun to-vm-attr (val)
-  ;; Convertit une chaîne (par ex. "R0") en symbole de mot-clé (par ex. :R0).
-  (intern (string-upcase val) 'KEYWORD))
-
 (defun is-jmp (insn)
   (if (member (first insn) '(JMP JSR JGT JGE JLT JLE JEQ JNE JTRUE JNIL))
       t

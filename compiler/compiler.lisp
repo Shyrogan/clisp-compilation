@@ -9,7 +9,6 @@
 (require "compiler/utils/optimizer.lisp")
 
 (defun comp (expr &optional (ctx '()))
-  (setq expr (optimize-expr expr))
   (cond
     ((symbolp expr) (comp-var expr ctx)) ; Compilation des variables
     ((atom expr) (comp-const expr ctx))  ; Compilation des constantes

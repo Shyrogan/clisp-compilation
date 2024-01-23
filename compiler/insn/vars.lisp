@@ -2,9 +2,9 @@
   (let ((local-offset (cdr (assoc var ctx))))
     (if local-offset
         ;; Charger une variable locale en utilisant son offset
-        `((LOAD (+ FP ,local-offset) R0) (PUSH R0))
+        `((LOAD (+ :FP ,local-offset) :R0) (PUSH :R0))
         ;; Charger une variable globale
-        `((LOAD (:@ ,var) R0) (PUSH R0)))))
+        `((LOAD (:@ ,var) :R0) (PUSH :R0)))))
 
 (defun comp-setf (operands ctx)
   (let ((variable (first operands))
@@ -13,8 +13,8 @@
       (append
        (comp valeur ctx) ; Assurez-vous que cette opération place le résultat dans R0
        (if local-var-offset
-           `((STORE R0 (+ FP ,(cdr local-var-offset))))
-           `((STORE R0 (:@ ,variable))))))))
+           `((STORE :R0 (+ :FP ,(cdr local-var-offset))))
+           `((STORE :R0 (:@ ,variable))))))))
 
 (defun extend-context-with-bindings (bindings ctx)
   (let ((extended-ctx ctx)
@@ -38,5 +38,5 @@
     
     (let ((body-instrs (comp body new-ctx)))
       (dotimes (i (length bindings))
-        (setq cleanup-instrs (append '((POP R1)) cleanup-instrs)))
+        (setq cleanup-instrs (append '((POP :R1)) cleanup-instrs)))
       (append binding-instrs body-instrs cleanup-instrs))))

@@ -2,7 +2,7 @@
   (let ((target (second insn)))
     (if (numberp target)
         (pc-set vm (+ target 1))
-        (pc-set vm (+ (attr-get vm (to-vm-attr target)) 1)))))
+        (pc-set vm (+ (attr-get vm target) 1)))))
 
 (defun handle-jsr (vm insn)
   ;; Extraire l'étiquette de l'instruction
@@ -11,7 +11,7 @@
         (progn
           ;; Si l'étiquette est définie, continuer avec l'exécution normale
           (attr-set vm :R1 (- (pc-get vm) 1))
-          (handle-push vm '(PUSH R1))
+          (handle-push vm '(PUSH :R1))
           (handle-jmp vm insn))
         ;; Gérer le cas où l'étiquette n'est pas définie
         (if (fboundp (intern (string-upcase label)))
@@ -37,10 +37,10 @@
         (reg2 (third insn)))
     (let ((val1 (cond 
                   ((is-const reg1) (second reg1))
-                  ((is-vm-attr reg1) (attr-get vm (to-vm-attr reg1)))))
+                  ((keywordp reg1) (attr-get vm reg1))))
           (val2 (cond 
                   ((is-const reg2) (second reg2))
-                  ((is-vm-attr reg2) (attr-get vm (to-vm-attr reg2))))))
+                  ((keywordp reg2) (attr-get vm reg2)))))
       ;; Gérer les cas où val1 ou val2 sont t ou nil
       (cond ((or (eq val1 't) (eq val1 'nil) (eq val2 't) (eq val2 'nil))
              ;; Comparaison d'égalité seulement
@@ -82,7 +82,7 @@
   (let ((dst (second insn)))
     (let ((v (cond 
             ((is-const dst) (second dst))
-            ((is-vm-attr dst) (attr-get vm (to-vm-attr dst))))))
+            ((keywordp dst) (attr-get vm dst)))))
       (attr-set vm :FNIL (null v)))))
 
 (defun handle-jtrue (vm insn)

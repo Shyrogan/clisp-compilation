@@ -20,20 +20,20 @@
 ;;   (format t "Test de fonction simple: ~A~%" (= 14 (attr-get vm :R0)))
 ;; )
 
-;; (let (
-;;   (vm '())
-;;   (func '(defun sum (n) (
-;;     if (= n 0) 0 (+ n (sum (- n 1)))
-;;   )))
-;;   (call '(sum 10))
-;; )
-;;   (vm-init vm)
-;;   (vm-load vm (comp func))
-;;   (vm-load vm (comp call))
-;;   (vm-execute vm)
+(let (
+  (vm '())
+  (func '(defun sum (n) (
+    if (= n 0) 0 (+ n (sum (- n 1)))
+  )))
+  (call '(sum 10))
+)
+  (vm-init vm)
+  (vm-load vm (comp func))
+  (vm-load vm (comp call))
+  (vm-execute vm)
 
-;;   (format t "Somme n: ~A~%" (= 55 (attr-get vm :R0)))
-;; )
+  (format t "Somme n: ~A~%" (attr-get vm :R0))
+)
 
 (let (
   (vm '())
@@ -87,13 +87,13 @@
   (format t "FIBO(25): ~A~%" (attr-get vm :R0))
 )
 
-;; (let (
-;;   (vm '())
-;;   (call '(if (numberp 1) 3 0))
-;; )
-;;   (vm-init vm)
-;;   (vm-load vm (comp call))
-;;   (vm-execute vm)
+(let (
+  (vm '())
+  (call '(if (numberp 1) 3 0))
+)
+  (vm-init vm)
+  (vm-load vm (comp call))
+  (vm-execute vm)
 
-;;   (format t "Fonction CLISP: ~A~%" (= (attr-get vm :R0) 3))
-;; )
+  (format t "Fonction CLISP: ~A~%" (= (attr-get vm :R0) 3))
+)

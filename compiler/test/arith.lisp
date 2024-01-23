@@ -18,6 +18,7 @@
 (let ((vm '()) (program '(>= 3 1)))
   (vm-init vm)
   (vm-load vm (comp program))
+  (format t "~A~%" (comp program))
   (vm-execute vm)
-  (format t "Une comparaison ~A: ~A~%" program (= (attr-get vm :R0) 1))
+  (format t "Une comparaison ~A: ~A~%" program (attr-get vm :R0))
 )

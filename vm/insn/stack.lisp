@@ -7,7 +7,7 @@
 
 (defun handle-pop (vm instr)
   (let ((dest (second instr)))
-    (handle-load vm (list 'LOAD "SP" dest))  ; Load the content of SP into dest
-    (handle-decr vm (list 'DECR "SP"))  ; Decrement SP
+    (handle-load vm `(LOAD :SP ,dest))  ; Load the content of SP into dest
+    (handle-decr vm `(DECR :SP))  ; Decrement SP
   )
 )

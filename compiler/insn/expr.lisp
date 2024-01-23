@@ -1,2 +1,2 @@
 (defun comp-const (expr ctx)
-  `((MOVE (:CONST ,expr) R0) (PUSH R0)))
+  `((MOVE (:CONST ,expr) :R0) (PUSH :R0)))

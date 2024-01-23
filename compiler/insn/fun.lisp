@@ -13,10 +13,10 @@
     ;; Assemblage des instructions de la fonction
     (append `((JMP ,exit-label)
             (LABEL ,entry-label))
-            `((PUSH FP) (MOVE SP FP))
+            `((PUSH :FP) (MOVE :SP :FP))
             (comp body new-ctx)
             cleanup-instrs
-            `((POP R0) (POP FP) (POP R1) (JMP R1))
+            `((POP :R0) (POP :FP) (POP :R1) (JMP :R1))
             `((LABEL ,exit-label)))))
 
 (defun comp-call (fun-name args ctx)
@@ -26,15 +26,15 @@
       (setq call-instrs (append call-instrs (comp arg ctx))))
     ;; Ajouter le nombre d'arguments
     (let ((nbArg (length args)))
-      (setq call-instrs (append call-instrs `((MOVE (:CONST ,nbArg) R0) (PUSH R0)))))
+      (setq call-instrs (append call-instrs `((MOVE (:CONST ,nbArg) :R0) (PUSH :R0)))))
 
     ;; Ajouter l'adresse de retour et l'instruction JSR à call-instrs
     (setq call-instrs (append call-instrs `((JSR ,fun-name))))
 
     (dolist (arg args)
-      (setq call-instrs (append call-instrs '((POP R1)))))
-    (setq call-instrs (append call-instrs `((POP R1))))
-    (setq call-instrs (append call-instrs '((PUSH R0))))
+      (setq call-instrs (append call-instrs '((POP :R1)))))
+    (setq call-instrs (append call-instrs `((POP :R1))))
+    (setq call-instrs (append call-instrs '((PUSH :R0))))
 
     ;; Retourner les instructions de l'appel de fonction
     call-instrs))

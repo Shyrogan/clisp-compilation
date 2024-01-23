@@ -1,8 +1,6 @@
 (require "vm/utils/vm.lisp")
 
 ;; Vérifie que pc-get/set/incr/decr fonctionne
-(format t "Test VM-ATTR: ~A~%" (is-vm-attr "R0"))  ;; Devrait maintenant afficher t
-(format t "Test TO-VM-ATTR: ~A~%" (equal (to-vm-attr "R0") :R0))  ;; Devrait maintenant afficher t
 (format t "Test IS-JUMP: ~A~%" (is-jmp '(JMP hello)))
 (format t "Test IS-LABEL: ~A~%" (is-label '(LABEL label)))
 

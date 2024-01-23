@@ -4,8 +4,8 @@
 (let (vm '())
   (vm-init vm)
   (vm-load vm '(
-    (MOVE (:CONST 10) R0)
-    (MOVE R0 R2)
+    (MOVE (:CONST 10) :R0)
+    (MOVE :R0 :R2)
   ))
   (vm-execute vm)
   (format t "Test MOVE CONST: ~A~%" (= (attr-get vm :R0) 10))
@@ -16,7 +16,7 @@
   (vm-init vm)
   (etiq-set vm 'a 10)
   (vm-load vm '(
-    (MOVE (:@ a) R0)
+    (MOVE (:@ a) :R0)
   ))
   (vm-execute vm)
   (format t "Test MOVE GLOBAL VAR: ~A~%" (= (attr-get vm :R0) 10)))

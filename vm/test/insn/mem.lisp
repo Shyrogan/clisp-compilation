@@ -4,9 +4,9 @@
 (let (vm '())
   (vm-init vm)
   (vm-load vm '(
-    (STORE (:CONST 2) R0)
-    (STORE R1 2)
-    (STORE (:CONST 10) (+ R0 2))
+    (STORE (:CONST 2) :R0)
+    (STORE :R1 2)
+    (STORE (:CONST 10) (+ :R0 2))
   ))
   (mem-set vm 1 2)
   (attr-set vm :R0 1)

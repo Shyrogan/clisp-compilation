@@ -19,7 +19,7 @@
      ;; Compile la condition
      (comp condition ctx)
      ;; Compare le résultat et saute à etiq-else si faux
-     `((CMP (:CONST nil) R0) (JEQ ,etiq-else))
+     `((CMP (:CONST nil) :R0) (JEQ ,etiq-else))
      ;; Compile la branche 'then'
      (comp then-part ctx)
      ;; Saute à la fin après le bloc 'then'
@@ -39,7 +39,7 @@
     (append
      `((LABEL ,etiq-boucle))
      (comp test ctx)
-     `((CMP (:CONST 0) R0) (JEQ ,etiq-fin))
+     `((CMP (:CONST nil) :R0) (JEQ ,etiq-fin))
      (comp body ctx)
      `((JMP ,etiq-boucle))
      `((LABEL ,etiq-fin)))))
@@ -60,7 +60,7 @@
      ;; Compilation de la condition
      (comp condition ctx)
      ;; Sauter à la fin si la condition est fausse
-     `((CMP (:CONST 0) R0) (JEQ ,etiq-fin))
+     `((CMP (:CONST nil) :R0) (JEQ ,etiq-fin))
      ;; Compilation du corps de la boucle
      (comp body ctx)
      ;; Compilation de l'incrément
