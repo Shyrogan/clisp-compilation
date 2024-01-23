@@ -26,3 +26,16 @@
   (vm-execute vm)
   (format t "FOR ~A: ~A~%" program (= (attr-get vm :R0) 5))
 )
+
+(let ((vm '()) 
+      (program '(progn 
+                  (setf count 0) 
+                  (for (setf i 0) (< i 5) (setf i (+ i 1)) 
+                  (when (oddp i) 
+                      (setf count (+ count 1)))) 
+                  count)))
+  (vm-init vm)
+  (vm-load vm (comp program))
+  (vm-execute vm)
+  (format t "WHEN ~A: ~A~%" program (= (attr-get vm :R0) 2))
+)

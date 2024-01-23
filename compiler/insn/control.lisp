@@ -70,7 +70,7 @@
      ;; Étiquette de fin de boucle
      `((LABEL ,etiq-fin)))))
 
-     (defun comp-cond (expr ctx)
+(defun comp-cond (expr ctx)
   (let ((clauses expr)
         (etiq-end (generate-label))
         (instructions '()))
@@ -92,3 +92,18 @@
     (append instructions `((LABEL ,etiq-end)))
   )
 )
+
+(defun comp-when (expr ctx)
+  ;; expr est de la forme (when condition body)
+  (let ((condition (first expr))
+        (body (rest expr))
+        (etiq-end (generate-label)))
+    (append
+     ;; Compiler la condition
+     (comp condition ctx)
+     ;; Si la condition est fausse, sauter à l'étiquette de fin
+     `((CMP (:CONST nil) :R0) (JEQ ,etiq-end))
+     ;; Compiler le corps si la condition est vraie
+     (comp-seq body ctx)
+     ;; Étiquette de fin
+     `((LABEL ,etiq-end)))))

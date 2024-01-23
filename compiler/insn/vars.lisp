@@ -18,9 +18,12 @@
 
 (defun extend-context-with-bindings (bindings ctx)
   (let ((extended-ctx ctx)
-        (max-offset (reduce (lambda (acc binding)
-                              (max acc (cdr binding)))
-                            ctx :initial-value 0)))
+        (max-offset 0))
+
+    (dolist (binding ctx)
+      (when (> (cdr binding) max-offset)
+        (setq max-offset (cdr binding))))
+
     (let ((offset (1+ max-offset)))
       (dolist (binding bindings extended-ctx)
         (let ((var-name (first binding)))

@@ -43,7 +43,7 @@
         (+ (fibonacci (- n 2)) (fibonacci (- n 1)))
       )
   )))
-  (call '(fibonacci 19))
+  (call '(fibonacci 20))
 )
   (vm-init vm)
   (vm-reset vm 1000000)
