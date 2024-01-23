@@ -30,6 +30,7 @@
        ((equal (first expr) 'if) (comp-if (cdr expr) ctx))
        ((equal (first expr) 'while) (comp-while (cdr expr) ctx))
        ((equal (first expr) 'for) (comp-for (cdr expr) ctx))
+       ((equal (first expr) 'cond) (comp-cond (cdr expr) ctx)) ; Ajout de la compilation pour 'cond'
        ((equal (first expr) 'setf) (comp-setf (cdr expr) ctx))
        ((equal (first expr) 'let) (comp-let (second expr) (third expr) ctx))
        ((equal (first expr) 'defun) (comp-fun (second expr) (third expr) (fourth expr) ctx))

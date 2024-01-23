@@ -69,3 +69,26 @@
      `((JMP ,etiq-boucle))
      ;; Étiquette de fin de boucle
      `((LABEL ,etiq-fin)))))
+
+     (defun comp-cond (expr ctx)
+  (let ((clauses expr)
+        (etiq-end (generate-label))
+        (instructions '()))
+
+    (dolist (clause clauses instructions)
+      (let ((condition (first clause))
+            (body (second clause))
+            (etiq-next (generate-label)))
+        (if (equal condition 't)
+            ;; Si la condition est "t", compiler directement le corps
+            (setq instructions (append instructions (comp body ctx) `((JMP ,etiq-end))))
+            ;; Sinon, compiler la condition et vérifier si elle est vraie
+            (progn
+              (setq instructions (append instructions (comp condition ctx)))
+              (setq instructions (append instructions `((CMP (:CONST nil) :R0) (JEQ ,etiq-next))))
+              (setq instructions (append instructions (comp body ctx) `((JMP ,etiq-end))))
+              (setq instructions (append instructions `((LABEL ,etiq-next))))
+            ))))
+    (append instructions `((LABEL ,etiq-end)))
+  )
+)

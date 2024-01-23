@@ -43,7 +43,7 @@
         (+ (fibonacci (- n 2)) (fibonacci (- n 1)))
       )
   )))
-  (call '(fibonacci 20))
+  (call '(fibonacci 19))
 )
   (vm-init vm)
   (vm-reset vm 1000000)
@@ -70,12 +70,12 @@
 
 (let (
   (vm '())
-  (func '(defun fibonacci (n) (
-    if (= n 0) 0
-      (if (<= n 2) 1
-        (+ (fibonacci (- n 2)) (fibonacci (- n 1)))
-      )
-  )))
+  (func '(defun fibonacci (n) 
+           (cond 
+             ((= n 0) 0)
+             ((<= n 2) 1)
+             (t (+ (fibonacci (- n 2)) (fibonacci (- n 1))))
+           )))
   (call '(fibonacci 25))
 )
   (vm-init vm)
